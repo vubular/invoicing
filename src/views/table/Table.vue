@@ -43,7 +43,7 @@
 	</div>
 </template>
 <script>
-	import InvoiceItemRow from "./table/ItemRow.vue";
+	import InvoiceItemRow from "./ItemRow.vue";
 
 	export default {
 		name: 'InvoiceTableView',
