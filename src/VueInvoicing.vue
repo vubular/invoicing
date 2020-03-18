@@ -26,19 +26,16 @@
 				:vat="vat"
 				:goods="goods"
 				:customer="customer"
-				:content="content"></invoice-content>
-
-			<invoice-cart :goods="goods"></invoice-cart>
+				:content="content"
+				@remove="removeContentItem"></invoice-content>
+		</div>
+		<div class="columns">
+			<invoice-cart :goods="goods" :features="features" @selected="addContentItem"></invoice-cart>
 			<invoice-total v-if="showTotal" :content="content"></invoice-total>
 		</div>
 	</div>
 </template>
 <script>
-	import Vue from 'vue';
-	import Buefy from 'buefy';
-	import 'buefy/dist/buefy.css';
-	Vue.use(Buefy);
-
 	import InvoiceLabel from "./partials/Label.vue";
 	import InvoiceToggle from "./partials/Toggle.vue";
 	import InvoiceContent from './views/Content.vue';
@@ -117,6 +114,14 @@
 			toggleState() {
 				this.toggled = !this.toggled;
 				this.$emit('toggled', this.toggled);
+			},
+			addContentItem(item) {
+				this.$emit("item-added", item);
+				this.content.push(item);
+			},
+			removeContentItem(item) {
+				this.$emit("item-removed", item.value);
+				this.content.splice(item.key, 1);
 			}
 		},
 		computed: {
@@ -124,7 +129,7 @@
 				return this.show || this.toggled;
 			},
 			showTotal() {
-				return this.features.include("total");
+				return this.features.includes("total");
 			}
 		}
 	}
