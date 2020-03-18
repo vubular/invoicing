@@ -1,10 +1,10 @@
-// Bulma, BUEFY
-import Buefy from 'buefy';
-import 'buefy/dist/buefy.css';
-
 // Import vue component
-import VueInvoicing from './VueInvoicing.vue';
+import Component from './VueInvoicing.vue';
 
-export {
-	VueInvoicing as VueInvoicing
-}
+export default {
+
+	install(Vue, options) {
+		Vue.component(Component.name, Component)
+	}
+
+};
