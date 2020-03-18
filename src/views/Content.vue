@@ -1,5 +1,7 @@
 <template>
-	<invoice-table-view></invoice-table-view>
+	<invoice-table-view :fields="fields"
+						:features="features"
+						:content="content"></invoice-table-view>
 </template>
 <script>
 	import InvoiceTableView from './table/Table.vue';
