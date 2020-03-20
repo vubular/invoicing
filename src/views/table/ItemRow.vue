@@ -4,11 +4,14 @@
 		<td v-if="visible('name')">
 			{{itemName}}
 			<textarea v-if="editable('description')"
-					  class="textarea"
-					  v-model="item.description"
-					  rows="1"></textarea>
+				class="textarea"
+				v-model="item.description"
+				rows="1"></textarea>
 			<font v-else>{{item.description}}</font>
-			<button v-if="snapshot.addons && snapshot.addons.length>0" type="button" class="button is-small" @click="$emit('new-addon')"> + Addon </button>
+			<button v-if="snapshot.addons && snapshot.addons.length>0" type="button" class="button is-small" @click="newAddon"> + Addon </button>
+			<button v-if="item.addons.length==0" type="button" class="button is-small is-pulled-right has-text-danger" @click="removeItem">
+				<i class="fal fa-times"></i>
+			</button>
 		</td>
 		<td v-if="visible('idlist')">
 			<div v-if="editable('idlist')">
@@ -21,9 +24,9 @@
 		<td v-if="visible('period')">{{item.period}}</td>
 		<td v-if="visible('quantity')">
 			<b-numberinput v-if="editable('quantity')"
-						   v-model="item.quantity"
-						   size="is-small"
-						   icon-pack="fal"></b-numberinput>
+				v-model="item.quantity"
+				size="is-small"
+				icon-pack="fal"></b-numberinput>
 			<font v-else>{{item.quantity}}</font>
 		</td>
 		<td v-if="visible('unit')" class="is-capitalized">
@@ -34,14 +37,16 @@
 		</td>
 		<td v-if="visible('price')">
 			<b-numberinput v-if="editable('price')"
-						   v-model="item.price"
-						   size="is-small"
-						   icon-pack="fal"
-						   step="0.01"></b-numberinput>
+				v-model="item.price"
+				size="is-small"
+				icon-pack="fal"
+				step="0.01"></b-numberinput>
 			<font v-else>{{item.price}}</font>
 		</td>
 		<td v-if="visible('offer')">
-			<b-select v-if="item.snapshot && item.snapshot.offers.length>0" v-model="item.offer" placeholder="Select Offer">
+			<b-select v-if="item.snapshot && item.snapshot.offers.length>0"
+				v-model="item.offer"
+				placeholder="Select Offer">
 				<option v-for="(offer, o) in item.snapshot.offers" :value="offer" :key="o">
 					{{offer.coupon}} ({{offer.discount}}%)
 				</option>
@@ -50,54 +55,39 @@
 		</td>
 		<td v-if="visible('discount')">
 			<b-numberinput v-if="editable('discount')"
-						   v-model="item.discount"
-						   size="is-small"
-						   icon-pack="fal"
-						   step="0.01"></b-numberinput>
+				v-model="item.discount"
+				size="is-small"
+				icon-pack="fal"
+				step="0.01"></b-numberinput>
 			<font v-else>{{item.discount}} %</font>
 		</td>
 		<td v-if="visible('vat')">
 			<b-numberinput v-if="editable('vat')"
-						   v-model="item.vat.amount"
-						   size="is-small"
-						   icon-pack="fal"
-						   step="0.01"></b-numberinput>
+				v-model="item.vat.amount"
+				size="is-small"
+				icon-pack="fal"
+				step="0.01"></b-numberinput>
 			<font v-else>{{item.vat.amount}} %</font>
 		</td>
 		<td v-if="visible('total') && show" class="has-text-right">{{item.price}}</td>
-		<td v-if="visible('totalVat')" class="has-text-right">{{item.price}}</td>
+		<td v-if="visible('totalVat')" class="has-text-right">
+			<b-numberinput v-if="editable('totalVat')"
+				v-model="item.price"
+				size="is-small"
+				icon-pack="fal"
+				step="0.01"></b-numberinput>
+			<font v-else>{{item.price}}</font>
+		</td>
 	</tr>
 </template>
 <script>
 	export default {
 		name: "InvoiceItemRow",
 		props: {
-			vat: {
-				type: Object,
-				default() {
-					return {
-						amount: 18,
-						included: true
-					}
-				}
-			},
+			itemKey: { type: Number },
 			show: { type: Boolean },
 			fields: { type: String },
 			features: { type: String },
-			customer: {
-				type: Object,
-				default() {
-					return {
-						exclusivity: {
-							discount: 0
-						},
-						vat: {
-							amount: 18,
-							included: true
-						}
-					}
-				}
-			},
 			item: { type: Object },
 			counter: { type: [ String, Number ] },
 			addons: { type: Array }
@@ -107,6 +97,12 @@
 			editable(column) {
 				return this.fields.includes(column+":edit") && !this.show;
 			},
+			newAddon() {
+				this.$emit('new-addon', this.itemKey);
+			},
+			removeItem() {
+				this.$emit('remove-item', this.itemKey);
+			}
 		},
 		computed: {
 			snapshot() { return this.item && this.item.snapshot ? this.item.snapshot : null; },
