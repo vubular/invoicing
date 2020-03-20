@@ -1,7 +1,7 @@
 {
   "private": false,
   "name": "vue-invoicing",
-  "version": "0.0.3",
+  "version": "0.0.5",
   "description": "Simple invoicing solution",
   "main": "src/index.js",
   "scripts": {
