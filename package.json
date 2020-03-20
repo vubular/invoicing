@@ -1,7 +1,7 @@
 {
   "private": false,
   "name": "vue-invoicing",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "Simple invoicing solution",
   "main": "src/index.js",
   "scripts": {
@@ -14,12 +14,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/mentorgashi/vue-invoicing.git"
+    "url": "git+https://github.com/vubular/vue-invoicing.git"
   },
   "author": "mentorgashi",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/mentorgashi/vue-invoicing/issues"
+    "url": "https://github.com/vubular/vue-invoicing/issues"
   },
-  "homepage": "https://github.com/mentorgashi/vue-invoicing#readme"
+  "homepage": "https://github.com/vubular/vue-invoicing#readme"
 }
