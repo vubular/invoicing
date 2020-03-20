@@ -13,7 +13,7 @@
 			</div>
 		</div>
 		<div class="columns is-multiline">
-			<invoice-label :label="label"></invoice-label>
+			<invoice-label :label="label" :show="showState"></invoice-label>
 			<invoice-toggle :show="showState"
 							:features="features"
 							:disabled="content.length==0"
@@ -21,16 +21,20 @@
 
 			<invoice-content :fields="fields"
 				:features="features"
-				:editables="editables"
 				:show="showState"
 				:vat="vat"
-				:goods="goods"
 				:customer="customer"
 				:content="content"
-				@remove="removeContentItem"></invoice-content>
+				@add-addon="addonAdded"
+				@set-addon="addonSelected"
+				@remove-addon="addonRemoved"
+				@remove-item="removeContentItem"></invoice-content>
 		</div>
 		<div class="columns">
-			<invoice-cart :goods="goods" :features="features" @selected="addContentItem"></invoice-cart>
+			<invoice-cart v-if="!showState"
+						  :goods="goods"
+						  :features="features"
+						  @selected="addContentItem"></invoice-cart>
 			<invoice-total v-if="showTotal" :content="content"></invoice-total>
 		</div>
 	</div>
@@ -49,22 +53,6 @@
 				type: String,
 				default: "Invoice"
 			},
-			fields: {
-				type: String,
-				default: "name,price,discount,total"
-			},
-			features: {
-				type: String,
-				default: "add,duplicate,remove,toggle"
-			},
-			editables: {
-				type: String,
-				default: "quantity,discount"
-			},
-			show: {
-				type: Boolean,
-				default: false
-			},
 			vat: {
 				type: Object,
 				default() {
@@ -74,15 +62,17 @@
 					}
 				}
 			},
-			goods: {
-				type: Array,
-				default() {
-					return [
-						{ label: "Subscriptions", icon: "fa fa-poll-people", component: "", },
-						{ label: "Services", icon: "fa fa-cubes", component: "", },
-						{ label: "Products", icon: "fa fa-shapes", component: "", }
-					]
-				}
+			show: {
+				type: Boolean,
+				default: false
+			},
+			fields: {
+				type: String,
+				default: "name,price,quantity:edit,discount:edit,totalVat"
+			},
+			features: {
+				type: String,
+				default: "add,duplicate,remove,toggle"
 			},
 			customer: {
 				type: Object,
@@ -91,7 +81,7 @@
 						exclusivity: {
 							discount: 0
 						},
-						vat: {
+						customVat: {
 							amount: 18,
 							included: true
 						}
@@ -102,6 +92,16 @@
 				type: Array,
 				default() {
 					return []
+				}
+			},
+			goods: {
+				type: Array,
+				default() {
+					return [
+						{ label: "Subscriptions", icon: "fa fa-poll-people", component: "", },
+						{ label: "Services", icon: "fa fa-cubes", component: "", },
+						{ label: "Products", icon: "fa fa-shapes", component: "", }
+					]
 				}
 			}
 		},
@@ -117,20 +117,42 @@
 			},
 			addContentItem(item) {
 				this.$emit("item-added", item);
-				this.content.push(item);
+				this.content.push({...this.prepareItem(item)});
 			},
 			removeContentItem(item) {
 				this.$emit("item-removed", item.value);
 				this.content.splice(item.key, 1);
+			},
+			prepareItem(item) {
+				var newItemVat = this.vat;
+				if(this.customer && this.customer.customVat) newItemVat = this.customer.customVat;
+				if((!this.customer || !this.customer.customVat) && item.vat) newItemVat = item.vat;
+
+				var newItemDiscount = 0;
+				if(this.customer && this.customer.exclusivity && this.customer.exclusivity.discount) {
+					newItemDiscount = this.customer.exclusivity.discount;
+				}
+
+				return {
+					snapshot: {...item},
+					name: null,
+					description: null,
+					period: null,
+					price: item.price ?? 0,
+					discount: newItemDiscount,
+					quantity: 1,
+					unit: item.unit ?? "Piece",
+					vat: {...newItemVat},
+					variant: null,
+					offer: null,
+					addons: [],
+					attributes: []
+				}
 			}
 		},
 		computed: {
-			showState() {
-				return this.show || this.toggled;
-			},
-			showTotal() {
-				return this.features.includes("total");
-			}
+			showState() { return this.show || this.toggled; },
+			showTotal() { return this.features.includes("total"); }
 		}
 	}
 </script>
