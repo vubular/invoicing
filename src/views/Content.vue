@@ -2,7 +2,7 @@
 	<invoice-table-view :show="show"
 						:fields="fields"
 						:features="features"
-						:content="content"
+						:content.sync="content"
 						v-on="$listeners"></invoice-table-view>
 </template>
 <script>

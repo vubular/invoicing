@@ -15,26 +15,23 @@
 		<div class="columns is-multiline">
 			<invoice-label :label="label" :show="showState"></invoice-label>
 			<invoice-toggle :show="showState"
-							:features="features"
-							:disabled="content.length==0"
-							@toggled="toggleState"></invoice-toggle>
-
-			<invoice-content :fields="fields"
 				:features="features"
-				:show="showState"
-				:vat="vat"
-				:customer="customer"
-				:content="content"
-				@add-addon="addonAdded"
-				@set-addon="addonSelected"
-				@remove-addon="addonRemoved"
-				@remove-item="removeContentItem"></invoice-content>
+				:disabled="content.length==0"
+				@toggled="toggleState"></invoice-toggle>
+			<invoice-content :show="showState"
+				:fields="fields"
+				:features="features"
+				:content.sync="content"
+				@new-addon="addItemAddon"
+				@set-addon="setItemAddon"
+				@remove-addon="removeItemAddon"
+				@remove-item="removeItem"></invoice-content>
 		</div>
 		<div class="columns">
 			<invoice-cart v-if="!showState"
-						  :goods="goods"
-						  :features="features"
-						  @selected="addContentItem"></invoice-cart>
+				:goods="goods"
+				:features="features"
+				@selected="addItem"></invoice-cart>
 			<invoice-total v-if="showTotal" :content="content"></invoice-total>
 		</div>
 	</div>
@@ -115,13 +112,26 @@
 				this.toggled = !this.toggled;
 				this.$emit('toggled', this.toggled);
 			},
-			addContentItem(item) {
+			addItem(item) {
 				this.$emit("item-added", item);
 				this.content.push({...this.prepareItem(item)});
 			},
-			removeContentItem(item) {
+			removeItem(item) {
 				this.$emit("item-removed", item.value);
 				this.content.splice(item.key, 1);
+			},
+			addItemAddon(itemKey) {
+				this.content[itemKey].addons.push(null);
+				this.$emit("item-addon-added", this.content[itemKey]);
+			},
+			setItemAddon(addon) {
+				this.content[addon.itemKey].addons[addon.key] = {...this.prepareItemAddon(addon)};
+				this.$emit("item-addon-set", this.content[addon.itemKey][addon.key]);
+				this.$forceUpdate();
+			},
+			removeItemAddon(addon) {
+				this.content[addon.itemKey].addons.splice(addon.key, 1);
+				this.$emit("item-addon-removed", this.content[addon.itemKey]);
 			},
 			prepareItem(item) {
 				var newItemVat = this.vat;
@@ -138,7 +148,7 @@
 					name: null,
 					description: null,
 					period: null,
-					price: item.price ?? 0,
+					price: +item.price ?? 0,
 					discount: newItemDiscount,
 					quantity: 1,
 					unit: item.unit ?? "Piece",
@@ -146,6 +156,31 @@
 					variant: null,
 					offer: null,
 					addons: [],
+					attributes: []
+				}
+			},
+			prepareItemAddon(addon) {
+				var itemAddonVat = this.vat;
+				if(this.customer && this.customer.customVat) itemAddonVat = this.customer.customVat;
+				if((!this.customer || !this.customer.customVat) && addon.value.vat) itemAddonVat = addon.value.vat;
+
+				var itemAddonDiscount = 0;
+				if(this.customer && this.customer.exclusivity && this.customer.exclusivity.discount) {
+					itemAddonDiscount = this.customer.exclusivity.discount;
+				}
+
+				return {
+					snapshot: {...addon.value},
+					name: null,
+					description: null,
+					period: this.content[addon.itemKey].period,
+					price: +addon.value.price ?? 0,
+					discount: itemAddonDiscount,
+					quantity: 1,
+					unit: addon.value.unit ?? "Piece",
+					vat: {...itemAddonVat},
+					variant: null,
+					offer: null,
 					attributes: []
 				}
 			}
