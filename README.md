@@ -1,5 +1,5 @@
 # vue-invoicing
----
+
 ## Overview
 
 vue-invoicing is a invoice composing component which runs in vue.js.
