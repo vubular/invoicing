@@ -19,27 +19,24 @@
 					</tr>
 				</thead>
 				<tbody v-for="(item, i) in content" :key="i">
-					<invoice-item-row
+					<invoice-item-row :item-key="i"
 						:show="show"
-						:item="item"
+						:item.sync="item"
 						:counter="i+1"
 						:fields="fields"
 						:features="features"
-						:vat="vat"
-						:customer="customer"
-						@new-addon="item.addons.push(null)"></invoice-item-row>
+						v-on="$listeners"></invoice-item-row>
 					<invoice-item-addon-row v-if="item.addons.length>0"
-						v-for="(addon, a) in item.addons"
-						:key="i+'.'+a"
+						v-for="(addon, a) in item.addons" :key="i+'.'+a"
+						:item-key="i"
+						:addon-key="a"
 						:show="show"
-						:addon="addon"
+						:addon.sync="addon"
 						:addons="item.snapshot.addons"
 						:counter="(i+1)+'.'+(a+1)"
 						:fields="fields"
 						:features="features"
-						:vat="vat"
-						:customer="customer"
-						@delete-addon="addonIndex => item.addons.splice(addonIndex,1)"></invoice-item-addon-row>
+						v-on="$listeners"></invoice-item-addon-row>
 				</tbody>
 			</table>
 		</div>
@@ -52,11 +49,9 @@
 		name: 'InvoiceTableView',
 		components: { InvoiceItemRow, InvoiceItemAddonRow },
 		props: {
-			vat: { type: Object },
 			show: { type: Boolean },
 			fields: { type: String },
 			features: { type: String },
-			customer: { type: Object },
 			content: {
 				type: Array,
 				default() {
