@@ -11,7 +11,7 @@
 						<th v-if="fields.includes('quantity')" class="is-narrow">Quantity</th>
 						<th v-if="fields.includes('unit')" class="is-narrow">Unit</th>
 						<th v-if="fields.includes('price')" class="is-narrow">Price</th>
-						<th v-if="fields.includes('offer')" class="is-narrow">Offers</th>
+						<th v-if="fields.includes('offer')" class="is-narrow">Offer</th>
 						<th v-if="fields.includes('discount')" class="is-narrow">Discount</th>
 						<th v-if="fields.includes('vat')" class="is-narrow">VAT</th>
 						<th v-if="fields.includes('total') && show" class="is-narrow">Price Incl. Vat</th>
