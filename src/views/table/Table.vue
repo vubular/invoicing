@@ -13,7 +13,7 @@
 						<th v-if="fields.includes('price')" class="is-narrow">Price</th>
 						<th v-if="fields.includes('offer')" class="is-narrow">Offer</th>
 						<th v-if="fields.includes('discount')" class="is-narrow">Discount</th>
-						<th v-if="fields.includes('vat')" class="is-narrow">VAT</th>
+						<th v-if="fields.includes('vat')" class="is-narrow" :style="vatWidth">VAT</th>
 						<th v-if="fields.includes('total') && show" class="is-narrow">Price Incl. Vat</th>
 						<th v-if="fields.includes('totalVat')" class="is-narrow">Total <font v-if="show">Incl. Vat</font></th>
 					</tr>
@@ -57,6 +57,11 @@
 				default() {
 					return []
 				}
+			}
+		},
+		computed: {
+			vatWidth() {
+				return (this.fields.includes("vat:edit") && !this.show) ? "width:210px" : "";
 			}
 		}
 	}

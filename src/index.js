@@ -17,7 +17,7 @@ export default {
 			value = +value;
 			if (value==null && Number(value)!=value) return value;
 			if(Number(value)==0) return "N/A";
-			return value + "%";
+			return value.toFixed(2) + "%";
 		});
 
 		Vue.component(Component.name, Component)
