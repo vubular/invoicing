@@ -1,17 +1,5 @@
 <template>
 	<div class="is-fullwidth">
-		<div class="columns" style="margin-bottom:50px;border-bottom: 4px solid">
-			<div class="column">
-				<input v-model="label" class="input" /> <br/> <br/>
-				<input v-model="fields" class="input" /> <br/> <br/>
-				<input v-model="features" class="input" /> <br/> <br/>
-				VAT:
-				<input type="checkbox" v-model="show">
-				<select v-model="vat.amount">
-					<option v-for="n in 100" :value="n" :key="n">{{n}}</option>
-				</select> <br/> <br/>
-			</div>
-		</div>
 		<div class="columns is-multiline">
 			<invoice-label :label="label" :show="showState"></invoice-label>
 			<invoice-toggle :show="showState"
@@ -29,8 +17,9 @@
 		</div>
 		<div class="columns">
 			<invoice-cart v-if="!showState"
-				:goods="goods"
+				:customer="customer"
 				:features="features"
+				:goods="goods"
 				@selected="addItem"></invoice-cart>
 			<invoice-total v-if="showTotal" :content="content"></invoice-total>
 		</div>

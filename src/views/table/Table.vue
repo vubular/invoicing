@@ -21,7 +21,7 @@
 				<tbody v-for="(item, i) in content" :key="i">
 					<invoice-item-row :item-key="i"
 						:show="show"
-						:item.sync="item"
+						:item="item"
 						:counter="i+1"
 						:fields="fields"
 						:features="features"
@@ -31,7 +31,7 @@
 						:item-key="i"
 						:addon-key="a"
 						:show="show"
-						:addon.sync="addon"
+						:addon="addon"
 						:addons="item.snapshot.addons"
 						:counter="(i+1)+'.'+(a+1)"
 						:fields="fields"
