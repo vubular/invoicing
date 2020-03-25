@@ -22,5 +22,7 @@
     "url": "https://github.com/vubular/vue-invoicing/issues"
   },
   "homepage": "https://github.com/vubular/vue-invoicing#readme",
-  "publishConfig": { "registry": "https://npm.pkg.github.com/" }
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org/"
+  }
 }
