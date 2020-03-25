@@ -3,11 +3,6 @@
 		<td class="has-text-grey has-text-weight-light">{{counter}}</td>
 		<td v-if="visible('name')">
 			{{itemName}}
-			<textarea v-if="editable('description')"
-				class="textarea"
-				v-model="item.description"
-				rows="1"></textarea>
-			<font v-else>{{item.description}}</font>
 			<button v-if="snapshot.addons && snapshot.addons.length>0"
 				type="button"
 				class="button is-small"
@@ -18,6 +13,12 @@
 				@click="removeItem">
 				<i class="fal fa-times"></i>
 			</button>
+			<textarea v-if="editable('description')"
+				class="textarea is-small"
+				v-model="item.description"
+				rows="1"
+				style="margin-top:10px"></textarea>
+			<font v-else>{{item.description}}</font>
 		</td>
 		<td v-if="visible('idlist')">
 			<div v-if="editable('idlist')">
@@ -35,6 +36,8 @@
 			<b-numberinput v-if="editable('quantity')"
 				v-model="item.quantity"
 				size="is-small"
+				min="1" step="1"
+				@input="updateVirtualTotal"
 				icon-pack="fal"></b-numberinput>
 			<font v-else>{{item.quantity}}</font>
 		</td>
@@ -49,8 +52,10 @@
 				v-model="item.price"
 				size="is-small"
 				icon-pack="fal"
-				step="0.01"></b-numberinput>
-			<font v-else>{{priceWithoutVat | pricing}}</font>
+				min="0"
+				step="0.01"
+				@input="updateVirtualTotal"></b-numberinput>
+			<font v-else>{{price.withoutVat | pricing}}</font>
 		</td>
 		<td v-if="visible('offer')">
 			<b-select v-if="item.snapshot && item.snapshot.offers.length>0 && !item.offer && !show"
@@ -70,19 +75,20 @@
 					<i class="fal fa-times"></i>
 				</button>
 			</font>
-
 		</td>
 		<td v-if="visible('discount')">
 			<b-numberinput v-if="editable('discount')"
-				v-model="item.discount"
+				v-model="virtualDiscount"
+				@input="setDiscount"
 				size="is-small"
 				icon-pack="fal"
+				max="100"
 				step="0.01"></b-numberinput>
 			<div v-else>
 				{{item.discount | percentage}}
-				<button v-if="item.discount>0" type="button" class="button has-text-grey-light is-small">
+				<!-- <button v-if="item.discount>0" type="button" class="button has-text-grey-light is-small">
 					{{discountedPriceWithoutVat | pricing}}
-				</button>
+				</button> -->
 			</div>
 		</td>
 		<td v-if="visible('vat')">
@@ -90,22 +96,29 @@
 				<b-numberinput v-model="item.vat.amount"
 					size="is-small"
 					icon-pack="fal"
-					step="0.01"></b-numberinput>
+					min="0" max="100"
+					step="0.01"
+					@input="updateVirtualTotal"></b-numberinput>
 			</div>
 			<font v-else>{{item.vat.amount | percentage}}</font>
 			<div v-if="editable('vat')" class="is-pulled-right">
-				<b-checkbox v-if="editable('vat')" v-model="item.vat.included" size="is-medium"></b-checkbox>
+				<b-checkbox v-if="editable('vat')"
+					v-model="item.vat.included"
+					size="is-medium"
+					@input="updateVirtualTotal"></b-checkbox>
 			</div>
 		</td>
-		<td v-if="visible('total') && show" class="has-text-right">{{discountedPriceWithVat | pricing}}</td>
+		<td v-if="visible('total') && show" class="has-text-right">{{price.withVat | pricing}}</td>
+		<td v-if="visible('totalDiscounted') && show" class="has-text-right">{{price.discounted+price.vat | pricing}}</td>
 		<td v-if="visible('totalVat')" class="has-text-right">
 			<b-numberinput v-if="editable('totalVat')"
 				v-model="virtualTotalVat"
 				@input="adaptDiscount"
 				size="is-small"
 				icon-pack="fal"
+				min="0"
 				step="0.01"></b-numberinput>
-			<font v-else>{{totalVatField | pricing}}</font>
+			<font v-else>{{virtualTotalVat | pricing}}</font>
 		</td>
 	</tr>
 </template>
@@ -123,12 +136,14 @@
 		},
 		data() {
 			return {
+				virtualDiscount: 0,
 				virtualTotalVat: 0,
 				readOnly: ""
 			}
 		},
 		mounted() {
-			this.virtualTotalVat = this.totalVatField;
+			this.virtualDiscount = this.item.discount;
+			this.virtualTotalVat = this.price.withVat * this.item.quantity;
 			if(this.editable("period")) { this.setPeriod(new Date); }
 		},
 		methods: {
@@ -147,6 +162,17 @@
 				if (mm<10) mm = '0' + mm;
 
 				this.item.period = mm + "/" + period.getFullYear();
+				this.item.addons.filter((addon) => {
+					addon.period = this.item.period;
+				})
+			},
+			setDiscount(discount) {
+				this.item.discount = discount;
+				this.$forceUpdate();
+				this.virtualTotalVat = this.price.discountedAfterVat * this.item.quantity;
+				if(this.item.discount<0) {
+					this.virtualTotalVat = this.price.increasedAfterVat * this.item.quantity;
+				}
 			},
 			cancelOffer() {
 				this.item.offer = null;
@@ -155,23 +181,37 @@
 				this.readOnly = this.readOnly.replace("quantity,discount,", "");
 			},
 			adaptDiscount(customTotal) {
-				console.log(customTotal);
-				var adaptedTotal = customTotal;
-
-				if(this.item.vat && this.item.vat.amount>0) {
-					var vatAmount = (adaptedTotal/100) * this.item.vat.amount;
-					adaptedTotal = this.item.vat.included ? adaptedTotal - vatAmount : adaptedTotal + vatAmount;
+				if(customTotal<0) {
+					this.virtualTotalVat = 0;
+					this.virtualDiscount = 100;
+					this.item.discount = 100;
+					this.$forceUpdate();
+					return;
 				}
 
+				var currentTotal = this.price.withVat * this.item.quantity;
 
-				console.log(adaptedTotal);
-				console.log(this.priceWithVat);
+				if(currentTotal!=0) {
+					var newDiscount = (customTotal*100)/currentTotal;
+					var adaptedDiscount = 100-newDiscount;
+					this.virtualDiscount = adaptedDiscount;
+					this.item.discount = adaptedDiscount;
+				}
 
-				var discount = (customTotal*100) / this.priceWithVat;
-				// discount = discount - this.item.vat.amount;
-				console.log(discount);
+				this.$forceUpdate();
+			},
+			updateVirtualTotal() {
+				this.$forceUpdate();
+				if(this.item.quantity<=0) { this.item.quantity = 1; }
+				if(this.item.price<0) { this.item.price = 0; }
+				if(this.item.discount>100) { this.item.discount = 100; this.virtualDiscount = 100; }
+				if(this.item.vat.amount>100) { this.item.vat.amount = 100;  }
+				if(this.item.vat.amount<0) { this.item.vat.amount = 0;  }
 
-				this.item.discount = (100-discount) - this.item.vat.amount;
+
+				this.item.discount = 0;
+				this.virtualDiscount = 0;
+				this.virtualTotalVat = this.price.discountedAfterVat * this.item.quantity;
 			}
 		},
 		computed: {
@@ -194,67 +234,49 @@
 				var idlist = this.snapshot.idlist ?? null;
 				return idlist;
 			},
-			discountedPriceWithoutVat() {
-				var priceWithoutVat = this.priceWithoutVat;
+			price: {
+				cache: false,
+				get() {
+					var price = (this.item && this.item.price) ? this.item.price : 0;
+					var withoutVat = price, withVat = price;
+					var vat = 0;
+					var discount = 0, discountAfterVat = 0;
+					var increase = 0, increaseAfterVat = 0;
 
-				if(this.item.discount>0) {
-					var discount = (priceWithoutVat/100) * this.item.discount;
-					priceWithoutVat = priceWithoutVat - discount;
-				}
-
-				return priceWithoutVat;
-			},
-			discountedPriceWithVat() {
-				if(this.item.discount>0) {
-					var priceWithoutVat = this.discountedPriceWithoutVat;
-
-					var priceWithVat = priceWithoutVat;
-					if(this.item.vat && this.item.vat.amount>0) {
-						var vatAmount = (priceWithoutVat/100) * this.item.vat.amount;
-						priceWithVat = priceWithoutVat + vatAmount;
+					if(this.item.vat.included && this.item.vat.amount>0) {
+						var vatDivider = +("1." + this.item.vat.amount);
+						vat = price - (price / vatDivider);
+						withoutVat = price - vat;
 					}
 
-					return priceWithVat;
-				}
-
-				if(this.item.vat && this.item.vat.amount>0 && !this.item.vat.included) {
-					var vatAmount = (this.item.price/100) * this.item.vat.amount;
-					return this.item.price + vatAmount;
-				}
-
-				return this.item.price;
-			},
-			priceWithVat() {
-				if(this.item.vat && this.item.vat.amount>0 && !this.item.vat.included) {
-					var vatAmount = (this.item.price/100) * this.item.vat.amount;
-					return this.item.price + vatAmount;
-				}
-
-				return this.item.price;
-			},
-			priceWithoutVat() {
-				if(this.item.vat && this.item.vat.amount>0 && this.item.vat.included) {
-					var vatAmount = (this.item.price/100) * this.item.vat.amount;
-					return this.item.price - vatAmount;
-				}
-
-				return this.item.price;
-			},
-			totalVatField() {
-				var finalPrice = this.priceWithVat;
-
-				if(this.item.discount>0) {
-					finalPrice = this.discountedPriceWithoutVat;
-
-					if(this.item.vat && this.item.vat.amount>0) {
-						var vatAmount = (finalPrice/100) * this.item.vat.amount;
-						finalPrice = finalPrice + vatAmount;
+					if(!this.item.vat.included && this.item.vat.amount>0) {
+						vat = (price/100) * this.item.vat.amount;
+						withVat = price + vat;
 					}
-				}
 
-				return finalPrice * this.item.quantity;
+					var discounted = withoutVat, discountedAfterVat = withVat;
+
+					if(this.item.discount && this.item.discount>0) {
+						discount = (withoutVat/100) * this.item.discount;
+						discounted = withoutVat - discount;
+
+						discountAfterVat = (withVat/100) * this.item.discount;
+						discountedAfterVat = withVat - discountAfterVat;
+					}
+
+					var increased = withoutVat, increasedAfterVat = withVat;
+
+					if(this.item.discount && this.item.discount<0) {
+						increase = (withoutVat/100) * (this.item.discount * (-1));
+						increased = withoutVat + increase;
+
+						increaseAfterVat = (withVat/100) * (this.item.discount * (-1));
+						increasedAfterVat = withVat + increaseAfterVat;
+					}
+
+					return { price, discount, discounted, discountedAfterVat, increase, increased, increasedAfterVat, vat, withVat, withoutVat }
+				}
 			}
-
 		},
 		watch: {
 			"item.offer": function (newValue, oldValue) {
@@ -265,16 +287,7 @@
 						this.readOnly = this.readOnly + "quantity,discount,";
 					}
 				}
-			},
-			"item.price": function() {
-				this.virtualTotalVat = this.totalVatField;
-			},
-			"item.discount": function() {
-				//this.virtualTotalVat = this.totalVatField;
-			},
-			"item.vat": function() {
-				this.virtualTotalVat = this.totalVatField;
-			},
+			}
 		}
 	}
 </script>
