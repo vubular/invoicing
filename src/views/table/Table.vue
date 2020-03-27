@@ -19,7 +19,8 @@
 					</tr>
 				</thead>
 				<tbody v-for="(item, i) in content" :key="i">
-					<invoice-item-row :item-key="i"
+					<invoice-item-row :key="i"
+						:item-key="i"
 						:show="show"
 						:item="item"
 						:counter="i+1"
@@ -27,7 +28,7 @@
 						:features="features"
 						v-on="$listeners"></invoice-item-row>
 					<invoice-item-addon-row v-if="item.addons.length>0"
-						v-for="(addon, a) in item.addons" :key="i+'.'+a"
+						v-for="(addon, a) in item.addons" :key="i+'.'+a+item.period"
 						:item-key="i"
 						:addon-key="a"
 						:show="show"
