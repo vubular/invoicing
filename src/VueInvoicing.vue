@@ -1,12 +1,15 @@
 <template>
-	<div class="is-fullwidth">
-		<div class="columns is-multiline">
-			<invoice-label :label="label" :show="showState"></invoice-label>
-			<invoice-toggle :show="showState"
-				:features="features"
+	<div v-if="showContentRow || showTotalRow" class="is-fullwidth">
+		<div v-if="showContentRow" class="columns is-multiline">
+			<invoice-label v-if="showLabel"
+				:show="showState"
+				:label="label"></invoice-label>
+			<invoice-toggle v-if="showToggle"
+				:show="showState"
 				:disabled="content.length==0"
 				@toggled="toggleState"></invoice-toggle>
-			<invoice-content :show="showState"
+			<invoice-content v-if="showContent"
+				:show="showState"
 				:fields="fields"
 				:features="features"
 				:content.sync="content"
@@ -15,13 +18,16 @@
 				@remove-addon="removeItemAddon"
 				@remove-item="removeItem"></invoice-content>
 		</div>
-		<div class="columns">
-			<invoice-cart v-if="!showState"
+		<div v-if="showTotalRow" class="columns">
+			<invoice-cart v-if="showCart"
 				:customer="customer"
 				:features="features"
 				:goods="goods"
 				@selected="addItem"></invoice-cart>
-			<invoice-total v-if="showTotal" :content="content"></invoice-total>
+			<invoice-total v-if="showTotal"
+				:show="showState"
+				:features="features"
+				:content.sync="content"></invoice-total>
 		</div>
 	</div>
 </template>
@@ -58,7 +64,7 @@
 			},
 			features: {
 				type: String,
-				default: "add,duplicate,remove,toggle"
+				default: "add,duplicate,remove,toggle,cart"
 			},
 			customer: {
 				type: Object,
@@ -107,11 +113,12 @@
 			},
 			removeItem(item) {
 				this.$emit("item-removed", item.value);
-				this.content.splice(item.key, 1);
+				this.content.splice(item.itemKey, 1);
+				this.$forceUpdate();
 			},
-			addItemAddon(itemKey) {
-				this.content[itemKey].addons.push(null);
-				this.$emit("item-addon-added", this.content[itemKey]);
+			addItemAddon(item) {
+				this.content[item.itemKey].addons.push(item.value);
+				this.$emit("item-addon-added", this.content[item.itemKey]);
 			},
 			setItemAddon(addon) {
 				this.content[addon.itemKey].addons[addon.key] = {...this.prepareItemAddon(addon)};
@@ -123,6 +130,8 @@
 				this.$emit("item-addon-removed", this.content[addon.itemKey]);
 			},
 			prepareItem(item) {
+				if(item && item.snapshot) return item;
+
 				var newItemVat = this.vat;
 				if(this.customer && this.customer.customVat) newItemVat = this.customer.customVat;
 				if((!this.customer || !this.customer.customVat) && item.vat) newItemVat = item.vat;
@@ -149,6 +158,8 @@
 				}
 			},
 			prepareItemAddon(addon) {
+				if(addon && addon.snapshot) return addon;
+
 				var itemAddonVat = this.vat;
 				if(this.customer && this.customer.customVat) itemAddonVat = this.customer.customVat;
 				if((!this.customer || !this.customer.customVat) && addon.value.vat) itemAddonVat = addon.value.vat;
@@ -176,7 +187,13 @@
 		},
 		computed: {
 			showState() { return this.show || this.toggled; },
-			showTotal() { return this.features.includes("total"); }
+			showLabel() { return this.label!="hide"; },
+			showTotal() { return this.features.includes("total"); },
+			showToggle() { return this.features.includes("toggle"); },
+			showContent() { return this.content && this.content.length>0; },
+			showCart() { return this.features.includes("cart") && !this.showState; },
+			showContentRow() { return this.showLabel || this.showToggle || this.showContent },
+			showTotalRow() { return this.showTotal || this.showCart },
 		}
 	}
 </script>

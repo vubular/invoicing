@@ -1,9 +1,9 @@
 <template>
-	<tr v-if="addon">
+	<tr v-if="validAddon">
 		<td class="has-text-grey has-text-weight-light">{{counter}}</td>
 		<td v-if="visible('name')">
 			{{addonName}}
-			<button type="button" class="button is-small is-pulled-right has-text-danger" @click="removeAddon">
+			<button v-if="!this.show" type="button" class="button is-small is-pulled-right has-text-danger" @click="removeAddon">
 				<i class="fal fa-times"></i>
 			</button>
 			<textarea v-if="editable('description')"
@@ -21,7 +21,7 @@
 			</div>
 			<font v-else>{{idlist}}</font>
 		</td>
-		<td v-if="visible('period')">{{addon.period}}</td>
+		<td v-if="visible('period')" :key="addon.period">{{addon.period}}</td>
 		<td v-if="visible('quantity')">
 			<b-numberinput v-if="editable('quantity')"
 						   v-model="addon.quantity"
@@ -96,18 +96,22 @@
 	<tr v-else>
 		<td class="has-text-grey has-text-weight-light">{{counter}}</td>
 		<td>
+			<div v-if="addonSet && !validAddon" class="is-inline-block has-text-grey" style="margin-right:15px">
+				<i class="fal fa-exclamation-square"></i>
+				Invalid addon!
+			</div>
 			<div class="is-inline-block">
-				<b-select @input="setAddon" placeholder="Select Addon">
+				<b-select @input="setAddon" placeholder="Select Addon" size="is-small">
 					<option v-for="(addon, a) in addons" :value="addon" :key="a">
 						{{addon.label}}, ({{addon.price}}/{{addon.unit}})
 					</option>
 				</b-select>
 			</div>
-			<div class="is-inline-block" style="margin-left:15px;position:relative;top:5px;opacity:.6">
+			<div class="is-inline-block" style="margin-left:8px;opacity:.6">
 				or <a href="#" class="has-text-danger" @click.prevent="removeAddon">delete</a>
 			</div>
 		</td>
-		<td colspan="20"><hr style="margin: 17px 0;background: #f0f0f0;height: 1px" /></td>
+		<td colspan="20"><hr style="margin: 11px 0;background: #f0f0f0;height: 1px" /></td>
 	</tr>
 </template>
 <script>
@@ -129,6 +133,12 @@
 				virtualDiscount: 0,
 				virtualTotalVat: 0,
 				readOnly: ""
+			}
+		},
+		mounted() {
+			if(this.addon && !this.addonSet && this.virtualTotalVat==0) {
+				this.addonSet = true;
+				this.virtualTotalVat = this.price.withVat * this.addon.quantity;
 			}
 		},
 		updated() {
@@ -194,7 +204,9 @@
 		computed: {
 			snapshot() { return this.addon && this.addon.snapshot ? this.addon.snapshot : null; },
 			addonName() {
-				var name = this.addon ? this.addon.name : "";
+				var name = "";
+				if(!this.validAddon) return name;
+				name = this.addon ? this.addon.name : "";
 				if(this.snapshot && this.snapshot.label) name = this.snapshot.label;
 				if(this.addon && this.addon.variant) name = `${name} ${this.addon.variant.label}`;
 				return name;
@@ -219,7 +231,23 @@
 				get() {
 					if(!this.addonSet) return 0;
 
-					var price = (this.addon && this.addon.price) ? this.addon.price : 0;
+					var price = this.addon.price ?? 0;
+					if(!this.validAddon) return price;
+
+					if(this.snapshot && price==this.snapshot.price) {
+						if(this.snapshot && this.snapshot.tiers && this.snapshot.tiers.length>0) {
+							this.snapshot.tiers.filter((tier) => {
+								if(tier.quantity <= this.addon.quantity && tier.price) {
+									price = tier.price;
+								}
+							})
+						}
+
+						if(this.addon.variant && this.addon.variant.price) {
+							price = this.addon.variant.price;
+						}
+					}
+
 					var withoutVat = price, withVat = price;
 					var vat = 0;
 					var discount = 0, discountAfterVat = 0;
@@ -238,7 +266,7 @@
 
 					var discounted = withoutVat, discountedAfterVat = withVat;
 
-					if(this.addon && this.addon.discount && this.addon.discount>0) {
+					if(this.addon.discount && this.addon.discount>0) {
 						discount = (withoutVat/100) * this.addon.discount;
 						discounted = withoutVat - discount;
 
@@ -248,7 +276,7 @@
 
 					var increased = withoutVat, increasedAfterVat = withVat;
 
-					if(this.addon && this.addon.discount && this.addon.discount<0) {
+					if(this.addon.discount && this.addon.discount<0) {
 						increase = (withoutVat/100) * (this.addon.discount * (-1));
 						increased = withoutVat + increase;
 
@@ -258,6 +286,13 @@
 
 					return { price, discount, discounted, discountedAfterVat, increase, increased, increasedAfterVat, vat, withVat, withoutVat }
 				}
+			},
+			validAddon() {
+				return this.addon &&
+					"price" in this.addon &&
+					"quantity" in this.addon &&
+					"discount" in this.addon &&
+					"vat" in this.addon
 			}
 		}
 	}

@@ -1,13 +1,13 @@
 <template>
-	<tr>
+	<tr v-if="validItem">
 		<td class="has-text-grey has-text-weight-light">{{counter}}</td>
 		<td v-if="visible('name')">
 			{{itemName}}
-			<button v-if="snapshot.addons && snapshot.addons.length>0"
+			<button v-if="snapshot.addons && snapshot.addons.length>0 && !this.show"
 				type="button"
 				class="button is-small"
 				@click="newAddon"> + Addon </button>
-			<button v-if="item.addons.length==0"
+			<button v-if="item.addons.length==0 && !this.show"
 				type="button"
 				class="button is-small is-pulled-right has-text-danger"
 				@click="removeItem">
@@ -33,13 +33,14 @@
 			<font v-else>{{item.period}}</font>
 		</td>
 		<td v-if="visible('quantity')">
-			<b-numberinput v-if="editable('quantity')"
+			<!-- <b-numberinput v-if="editable('quantity')"
 				v-model="item.quantity"
 				size="is-small"
 				min="1" step="1"
 				@input="updateVirtualTotal"
 				icon-pack="fal"></b-numberinput>
-			<font v-else>{{item.quantity}}</font>
+			<font v-else>{{item.quantity}}</font> -->
+			<font>{{item.quantity}}</font>
 		</td>
 		<td v-if="visible('unit')" class="is-capitalized">
 			<b-select v-if="editable('unit')" v-model="item.unit" placeholder="Change unit" size="is-small">
@@ -121,6 +122,14 @@
 			<font v-else>{{virtualTotalVat | pricing}}</font>
 		</td>
 	</tr>
+	<tr v-else>
+		<td class="has-text-grey has-text-weight-light">{{counter}}</td>
+		<td>
+			<font class="has-text-grey"><i class="fal fa-exclamation-square"></i> Invalid item!</font>
+			<a href="#" class="has-text-danger" @click.prevent="removeItem" style="margin-left:15px;opacity:.6">delete</a>
+		</td>
+		<td colspan="20"><hr style="margin: 11px 0;background: #f0f0f0;height: 1px" /></td>
+	</tr>
 </template>
 <script>
 	export default {
@@ -152,16 +161,22 @@
 				return this.fields.includes(column+":edit") && !this.readOnly.includes(column) && !this.show;
 			},
 			newAddon() {
-				this.$emit('new-addon', this.itemKey);
+				this.$emit('new-addon', {
+					itemKey: this.itemKey,
+					value: null
+				});
 			},
 			removeItem() {
-				this.$emit('remove-item', this.itemKey);
+				this.$emit('remove-item', {
+					itemKey: this.itemKey,
+					value: this.item
+				});
 			},
 			setPeriod(period) {
-				var mm = period.getMonth() + 1;
-				if (mm<10) mm = '0' + mm;
+				var month = period.getMonth() + 1;
+				if (month<10) month = '0' + month;
 
-				this.item.period = mm + "/" + period.getFullYear();
+				this.item.period = month + "/" + period.getFullYear();
 				this.item.addons.filter((addon) => {
 					addon.period = this.item.period;
 				})
@@ -205,9 +220,8 @@
 				if(this.item.quantity<=0) { this.item.quantity = 1; }
 				if(this.item.price<0) { this.item.price = 0; }
 				if(this.item.discount>100) { this.item.discount = 100; this.virtualDiscount = 100; }
-				if(this.item.vat.amount>100) { this.item.vat.amount = 100;  }
-				if(this.item.vat.amount<0) { this.item.vat.amount = 0;  }
-
+				if(this.item.vat.amount>100) { this.item.vat.amount = 100; }
+				if(this.item.vat.amount<0) { this.item.vat.amount = 0; }
 
 				this.item.discount = 0;
 				this.virtualDiscount = 0;
@@ -218,12 +232,16 @@
 			minimumDate() { var md = new Date(); return new Date(md.setDate(0)); },
 			snapshot() { return this.item && this.item.snapshot ? this.item.snapshot : null; },
 			itemName() {
-				var name = this.item.name ?? this.snapshot.name;
+				var name = "";
+				if(!this.validItem) return name;
+
+				name = this.item.name ?? this.snapshot.name;
 				if(this.item.variant) name = `${name} ${this.item.variant.label}`;
 				return name;
 			},
 			offer() {
 				var offer = "N/A";
+				if(!this.validItem) return offer;
 				if(this.item && this.item.offer) offer = `${this.item.offer.coupon} (${this.item.offer.discount}%)`;
 				return offer;
 			},
@@ -237,7 +255,23 @@
 			price: {
 				cache: false,
 				get() {
-					var price = (this.item && this.item.price) ? this.item.price : 0;
+					var price = this.item.price ?? 0;
+					if(!this.validItem) return price;
+
+					if(this.snapshot && price==this.snapshot.price) {
+						if(this.snapshot && this.snapshot.tiers && this.snapshot.tiers.length>0) {
+							this.snapshot.tiers.filter((tier) => {
+								if(tier.quantity <= this.item.quantity && tier.price) {
+									price = tier.price;
+								}
+							})
+						}
+
+						if(this.item.variant && this.item.variant.price) {
+							price = this.item.variant.price;
+						}
+					}
+
 					var withoutVat = price, withVat = price;
 					var vat = 0;
 					var discount = 0, discountAfterVat = 0;
@@ -276,6 +310,13 @@
 
 					return { price, discount, discounted, discountedAfterVat, increase, increased, increasedAfterVat, vat, withVat, withoutVat }
 				}
+			},
+			validItem() {
+				return this.item &&
+					"price" in this.item &&
+					"quantity" in this.item &&
+					"discount" in this.item &&
+					"vat" in this.item
 			}
 		},
 		watch: {

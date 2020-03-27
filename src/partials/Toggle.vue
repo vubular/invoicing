@@ -1,5 +1,5 @@
 <template>
-	<div v-if="showToggle" class="column">
+	<div class="column">
 		<button type="button"
 				class="button is-size-6 is-pulled-right has-text-grey"
 				@click="$emit('toggled')"
@@ -15,15 +15,11 @@
 		name: "InvoiceToggle",
 		props: {
 			show: { type: Boolean, default: false },
-			features: { type: String },
-			disabled: { type: Boolean },
+			disabled: { type: Boolean }
 		},
 		computed: {
 			icon() {
 				return this.show ? "fal fa-check-square" : "fal fa-square";
-			},
-			showToggle() {
-				return this.features.includes("toggle");
 			}
 		}
 	}
