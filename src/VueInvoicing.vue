@@ -64,7 +64,7 @@
 			},
 			features: {
 				type: String,
-				default: "add,duplicate,remove,toggle,cart"
+				default: "toggle,cart"
 			},
 			customer: {
 				type: Object,
@@ -188,7 +188,7 @@
 		computed: {
 			showState() { return this.show || this.toggled; },
 			showLabel() { return this.label!="hide"; },
-			showTotal() { return this.features.includes("total"); },
+			showTotal() { return this.features.includes("total") && this.content && this.content.length>0; },
 			showToggle() { return this.features.includes("toggle"); },
 			showContent() { return this.content && this.content.length>0; },
 			showCart() { return this.features.includes("cart") && !this.showState; },

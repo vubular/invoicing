@@ -1,6 +1,6 @@
 <template>
 	<div class="column">
-		<div v-if="shopGoods" class="dropdown" :class="{'is-active': active}">
+		<div class="dropdown" :class="{'is-active': active}">
 			<div class="dropdown-trigger">
 				<button type="button" class="button is-success is-outlined" @click="active=!active">
 					<span class="icon"><i class="fal fa-shopping-cart"></i></span>
@@ -54,11 +54,6 @@
 			return {
 				active: false,
 				browsing: null
-			}
-		},
-		computed: {
-			shopGoods() {
-				return this.features.includes("add");
 			}
 		},
 		methods: {
