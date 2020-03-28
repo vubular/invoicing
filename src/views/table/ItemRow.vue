@@ -152,7 +152,7 @@
 		},
 		mounted() {
 			this.virtualDiscount = this.item.discount;
-			this.virtualTotalVat = this.price.withVat * this.item.quantity;
+			this.virtualTotalVat = this.price.finalPrice * this.item.quantity;
 			if(this.editable("period")) { this.setPeriod(new Date); }
 		},
 		methods: {
@@ -184,10 +184,7 @@
 			setDiscount(discount) {
 				this.item.discount = discount;
 				this.$forceUpdate();
-				this.virtualTotalVat = this.price.discountedAfterVat * this.item.quantity;
-				if(this.item.discount<0) {
-					this.virtualTotalVat = this.price.increasedAfterVat * this.item.quantity;
-				}
+				this.virtualTotalVat = this.price.finalPrice * this.item.quantity;
 			},
 			cancelOffer() {
 				this.item.offer = null;
@@ -225,7 +222,7 @@
 
 				this.item.discount = 0;
 				this.virtualDiscount = 0;
-				this.virtualTotalVat = this.price.discountedAfterVat * this.item.quantity;
+				this.virtualTotalVat = this.price.finalPrice * this.item.quantity;
 			}
 		},
 		computed: {
@@ -289,6 +286,7 @@
 					}
 
 					var discounted = withoutVat, discountedAfterVat = withVat;
+					var finalPrice = withVat;
 
 					if(this.item.discount && this.item.discount>0) {
 						discount = (withoutVat/100) * this.item.discount;
@@ -296,6 +294,7 @@
 
 						discountAfterVat = (withVat/100) * this.item.discount;
 						discountedAfterVat = withVat - discountAfterVat;
+						finalPrice = discountedAfterVat;
 					}
 
 					var increased = withoutVat, increasedAfterVat = withVat;
@@ -305,10 +304,11 @@
 						increased = withoutVat + increase;
 
 						increaseAfterVat = (withVat/100) * (this.item.discount * (-1));
-						increasedAfterVat = withVat + increaseAfterVat;
+						increasedAfterVat = +withVat + +increaseAfterVat;
+						finalPrice = increasedAfterVat;
 					}
 
-					return { price, discount, discounted, discountedAfterVat, increase, increased, increasedAfterVat, vat, withVat, withoutVat }
+					return { price, discount, discounted, discountedAfterVat, increase, increased, increasedAfterVat, vat, withVat, withoutVat, finalPrice }
 				}
 			},
 			validItem() {

@@ -26,6 +26,7 @@
 				@selected="addItem"></invoice-cart>
 			<invoice-total v-if="showTotal"
 				:show="showState"
+				:vat="vat"
 				:features="features"
 				:content.sync="content"></invoice-total>
 		</div>

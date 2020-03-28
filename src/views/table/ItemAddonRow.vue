@@ -138,13 +138,15 @@
 		mounted() {
 			if(this.addon && !this.addonSet && this.virtualTotalVat==0) {
 				this.addonSet = true;
-				this.virtualTotalVat = this.price.withVat * this.addon.quantity;
+				this.virtualTotalVat = this.price.finalPrice * this.addon.quantity;
+				this.virtualDiscount = this.addon.discount;
 			}
 		},
 		updated() {
 			if(this.addon && !this.addonSet && this.virtualTotalVat==0) {
 				this.addonSet = true;
-				this.virtualTotalVat = this.price.withVat * this.addon.quantity;
+				this.virtualTotalVat = this.price.finalPrice * this.addon.quantity;
+				this.virtualDiscount = this.addon.discount;
 			}
 		},
 		methods: {
@@ -169,10 +171,7 @@
 			setDiscount(discount) {
 				this.addon.discount = discount;
 				this.$forceUpdate();
-				this.virtualTotalVat = this.price.discountedAfterVat * this.addon.quantity;
-				if(this.addon.discount<0) {
-					this.virtualTotalVat = this.price.increasedAfterVat * this.addon.quantity;
-				}
+				this.virtualTotalVat = this.price.finalPrice * this.addon.quantity;
 			},
 			adaptDiscount(customTotal) {
 				if(customTotal<0) {
@@ -198,7 +197,7 @@
 				this.$forceUpdate();
 				this.addon.discount = 0;
 				this.virtualDiscount = 0;
-				this.virtualTotalVat = this.price.discountedAfterVat * this.addon.quantity;
+				this.virtualTotalVat = this.price.finalPrice * this.addon.quantity;
 			}
 		},
 		computed: {
@@ -265,6 +264,7 @@
 					}
 
 					var discounted = withoutVat, discountedAfterVat = withVat;
+					var finalPrice = withVat;
 
 					if(this.addon.discount && this.addon.discount>0) {
 						discount = (withoutVat/100) * this.addon.discount;
@@ -272,6 +272,7 @@
 
 						discountAfterVat = (withVat/100) * this.addon.discount;
 						discountedAfterVat = withVat - discountAfterVat;
+						finalPrice = discountedAfterVat;
 					}
 
 					var increased = withoutVat, increasedAfterVat = withVat;
@@ -281,10 +282,11 @@
 						increased = withoutVat + increase;
 
 						increaseAfterVat = (withVat/100) * (this.addon.discount * (-1));
-						increasedAfterVat = withVat + increaseAfterVat;
+						increasedAfterVat = +withVat + +increaseAfterVat;
+						finalPrice = increasedAfterVat;
 					}
 
-					return { price, discount, discounted, discountedAfterVat, increase, increased, increasedAfterVat, vat, withVat, withoutVat }
+					return { price, discount, discounted, discountedAfterVat, increase, increased, increasedAfterVat, vat, withVat, withoutVat, finalPrice }
 				}
 			},
 			validAddon() {
