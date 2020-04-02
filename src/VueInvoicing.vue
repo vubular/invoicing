@@ -122,7 +122,9 @@
 				this.$emit("item-addon-added", this.content[item.itemKey]);
 			},
 			setItemAddon(addon) {
-				this.content[addon.itemKey].addons[addon.key] = {...this.prepareItemAddon(addon)};
+				this.content[addon.itemKey].addons[addon.key] = {
+					...this.prepareItemAddon(this.content[addon.itemKey],addon)
+				};
 				this.$emit("item-addon-set", this.content[addon.itemKey][addon.key]);
 				this.$forceUpdate();
 			},
@@ -158,10 +160,12 @@
 					attributes: []
 				}
 			},
-			prepareItemAddon(addon) {
+			prepareItemAddon(item, addon) {
 				if(addon && addon.snapshot) return addon;
 
 				var itemAddonVat = this.vat;
+				if(item && item.vat) itemAddonVat = item.vat;
+
 				if(this.customer && this.customer.customVat) itemAddonVat = this.customer.customVat;
 				if((!this.customer || !this.customer.customVat) && addon.value.vat) itemAddonVat = addon.value.vat;
 

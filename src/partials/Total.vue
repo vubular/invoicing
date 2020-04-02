@@ -118,7 +118,7 @@
 					withoutVat += this.price(item).increased * item.quantity;
 					if(item.addons && item.addons.length>0) {
 						item.addons.filter((addon) => {
-							withoutVat += this.price(addon).increased * addon.quantity;
+							withoutVat += this.price(addon).finalPrice * addon.quantity;
 						})
 					}
 				});
