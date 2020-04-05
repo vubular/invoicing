@@ -39,7 +39,7 @@
 	import InvoiceCart from './partials/Cart';
 	import InvoiceTotal from './partials/Total';
 	export default {
-		name: 'VueInvoicing',
+		name: 'VubularInvoicing',
 		components: { InvoiceLabel, InvoiceToggle, InvoiceContent, InvoiceCart, InvoiceTotal },
 		props: {
 			label: {
