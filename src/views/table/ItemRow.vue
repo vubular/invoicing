@@ -29,7 +29,7 @@
 			<font v-else>{{item.idlist}}</font>
 		</td>
 		<td v-if="visible('period')">
-			<b-datepicker v-if="editable('period')" :value="new Date()" @input="setPeriod" type="month" icon-pack="fa" icon="calendar-alt" size="is-small" :min-date="minimumDate"></b-datepicker>
+			<b-datepicker v-if="editable('period')" v-model="virtualPeriod" @input="setPeriod" type="month" icon-pack="fa" icon="calendar-alt" size="is-small"  multiple></b-datepicker>
 			<font v-else>{{item.period}}</font>
 		</td>
 		<td v-if="visible('quantity')">
@@ -145,6 +145,7 @@
 		},
 		data() {
 			return {
+				virtualPeriod: [new Date],
 				virtualDiscount: 0,
 				virtualTotalVat: 0,
 				readOnly: ""
@@ -173,13 +174,25 @@
 				});
 			},
 			setPeriod(period) {
-				var month = period.getMonth() + 1;
-				if (month<10) month = '0' + month;
+				var pers = [];
+				if(Array.isArray(period)) {
+					period.filter(per => {
+						pers.push(this.dayjs(per).format("MM/YYYY"));
+					});
+				} else {
+					pers.push(this.dayjs(period).format("MM/YYYY"));
+				}
 
-				this.item.period = month + "/" + period.getFullYear();
+				this.item.quantity = this.arrayUnique(pers).length;
+				pers = this.arrayUnique(pers).join(", ");
+
+				this.item.period = pers;
 				this.item.addons.filter((addon) => {
 					addon.period = this.item.period;
-				})
+				});
+
+				this.virtualTotalVat = this.price.finalPrice * this.item.quantity;
+				this.$forceUpdate();
 			},
 			setDiscount(discount) {
 				this.item.discount = discount;

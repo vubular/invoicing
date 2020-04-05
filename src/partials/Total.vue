@@ -49,6 +49,7 @@
 					"vat" in item
 			},
 			price(item) {
+				if(!item) return 0;
 				var price = item.price ?? 0;
 				if(!this.validItem(item)) return price;
 
@@ -66,7 +67,7 @@
 					}
 				}
 
-				var withoutVat = price, withVat = price;
+				var withoutVat = +price, withVat = +price;
 				var vat = 0;
 				var discount = 0, discountAfterVat = 0;
 				var increase = 0, increaseAfterVat = 0;
@@ -88,10 +89,10 @@
 				if(item.discount && item.discount>0) {
 					discount = (withoutVat/100) * item.discount;
 					discounted = withoutVat - discount;
-					finalPrice = discounted;
 
 					discountAfterVat = (withVat/100) * item.discount;
 					discountedAfterVat = withVat - discountAfterVat;
+					finalPrice = discountedAfterVat;
 				}
 
 				var increased = withoutVat, increasedAfterVat = withVat;
@@ -99,41 +100,42 @@
 				if(item.discount && item.discount<0) {
 					increase = (withoutVat/100) * (item.discount * (-1));
 					increased = withoutVat + increase;
-					finalPrice = discounted;
 
 					increaseAfterVat = (withVat/100) * (item.discount * (-1));
 					increasedAfterVat = withVat + increaseAfterVat;
-
 					finalPrice = increasedAfterVat;
 				}
 
-				return { price, discount, discounted, discountedAfterVat, increase, increased, increasedAfterVat, vat, withVat, withoutVat, finalPrice }
+				return { price: +price, discount, discounted, discountedAfterVat, increase, increased, increasedAfterVat, vat, withVat, withoutVat, finalPrice }
 			}
 		},
 		computed: {
 			total() {
-				var withoutVat = 0, vat = 0, withVat = 0;
+				var vat = 0, withVat = 0;
 
 				this.content.filter((item) => {
-					withoutVat += this.price(item).increased * item.quantity;
-					if(item.addons && item.addons.length>0) {
-						item.addons.filter((addon) => {
-							withoutVat += this.price(addon).finalPrice * addon.quantity;
-						})
-					}
-				});
-
-				this.content.filter((item) => {
+					vat += this.price(item).vat * item.quantity;
 					withVat += this.price(item).finalPrice * item.quantity;
 					if(item.addons && item.addons.length>0) {
 						item.addons.filter((addon) => {
-							withVat += this.price(addon).finalPrice * addon.quantity;
+							if(addon) {
+								var addonVat = this.price(addon).vat * addon.quantity;
+								var addonWithVat = this.price(addon).finalPrice * addon.quantity;
+								if(addon.period) {
+									var dates = addon.period.split(", ");
+									if(dates.length>1) {
+										addonVat = addonVat * dates.length;
+										addonWithVat = addonWithVat * dates.length;
+									}
+								}
+								vat += addonVat;
+								withVat += addonWithVat;
+							}
 						})
 					}
 				});
 
-				vat = withVat - withoutVat;
-
+				var withoutVat = withVat - vat;
 				return { withoutVat, vat, withVat };
 			}
 		}

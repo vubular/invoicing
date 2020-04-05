@@ -286,6 +286,11 @@
 						finalPrice = increasedAfterVat;
 					}
 
+					if(this.addon.period) {
+						var dates = this.addon.period.split(", ");
+						if(dates.length>1) finalPrice = finalPrice * dates.length;
+					}
+
 					return { price, discount, discounted, discountedAfterVat, increase, increased, increasedAfterVat, vat, withVat, withoutVat, finalPrice }
 				}
 			},
