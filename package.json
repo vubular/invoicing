@@ -1,6 +1,6 @@
 {
   "private": false,
-  "name": "vue-invoicing",
+  "name": "@vubular/invoicing",
   "version": "0.0.11",
   "description": "Simple invoicing solution",
   "main": "src/index.js",
