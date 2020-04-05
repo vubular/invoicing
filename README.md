@@ -1,4 +1,4 @@
-# vue-invoicing
+# @vubular/invoicing
 
 ## Overview
 
@@ -13,13 +13,13 @@ npm install --save vue-invoicing
 ### Import using module
 use this code in app.js(entry js):
 ```
-import VueInvoicing from 'vue-invoicing';
-Vue.use(VueInvoicing);
+import VubularInvoicing from 'vubular-invoicing';
+Vue.use(VubularInvoicing);
 ```
 ## Usage
 
 ```
-<vue-invoicing fields="name,offer,discount:edit,price,quantity:edit,unit:edit,vat:edit,totalVat:edit"></vue-invoicing>
+<vubular-invoicing fields="name,offer,discount:edit,price,quantity:edit,unit:edit,vat:edit,totalVat:edit"></vubular-invoicing>
 ```
 ## License
 
