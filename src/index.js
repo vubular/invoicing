@@ -1,5 +1,5 @@
 // Import vue component
-import Component from './VueInvoicing.vue';
+import Component from './VubularInvoicing.vue';
 
 export default {
 
