@@ -7,7 +7,7 @@ vue-invoicing is a invoice composing component which runs in vue.js.
 ## Install
 
 ```
-npm install --save vue-invoicing
+npm install --save @vubular/invoicing
 ```
 
 ### Import using module
