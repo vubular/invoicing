@@ -1,5 +1,4 @@
 {
-  "private": false,
   "name": "@vubular/invoicing",
   "version": "0.0.2",
   "description": "Simple invoicing solution",
@@ -21,8 +20,5 @@
   "bugs": {
     "url": "https://github.com/vubular/invoicing/issues"
   },
-  "homepage": "https://github.com/vubular/invoicing#readme",
-  "publishConfig": {
-    "registry": "https://npm.pkg.github.com/"
-  }
+  "homepage": "https://github.com/vubular/invoicing#readme"
 }
