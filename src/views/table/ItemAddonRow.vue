@@ -3,7 +3,7 @@
 		<td class="has-text-grey has-text-weight-light">{{counter}}</td>
 		<td v-if="visible('name')">
 			{{addonName}}
-			<button v-if="!this.show" type="button" class="button is-small is-pulled-right has-text-danger" @click="removeAddon">
+			<button v-if="removable" type="button" class="button is-small is-pulled-right has-text-danger" @click="removeAddon">
 				<i class="fal fa-times"></i>
 			</button>
 			<textarea v-if="editable('description')"
@@ -154,6 +154,9 @@
 			editable(column) {
 				return this.fields.includes(column+":edit") && !this.readOnly.includes(column) && !this.show;
 			},
+			removable() {
+				return (this.fields.includes("name:remove")||this.fields.includes("name:edit:remove")) && !this.show;
+			},
 			setAddon(addon) {
 				this.$emit('set-addon', {
 					itemKey: this.itemKey,
@@ -195,8 +198,8 @@
 			},
 			updateVirtualTotal() {
 				this.$forceUpdate();
-				this.addon.discount = 0;
-				this.virtualDiscount = 0;
+				// this.addon.discount = 0;
+				// this.virtualDiscount = 0;
 				this.virtualTotalVat = this.price.finalPrice * this.addon.quantity;
 			}
 		},

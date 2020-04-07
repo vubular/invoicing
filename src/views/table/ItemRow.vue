@@ -7,7 +7,7 @@
 				type="button"
 				class="button is-small"
 				@click="newAddon"> + Addon </button>
-			<button v-if="item.addons.length==0 && !this.show"
+			<button v-if="removable"
 				type="button"
 				class="button is-small is-pulled-right has-text-danger"
 				@click="removeItem">
@@ -145,7 +145,7 @@
 		},
 		data() {
 			return {
-				virtualPeriod: [new Date],
+				virtualPeriod: [],
 				virtualDiscount: 0,
 				virtualTotalVat: 0,
 				readOnly: ""
@@ -154,12 +154,22 @@
 		mounted() {
 			this.virtualDiscount = this.item.discount;
 			this.virtualTotalVat = this.price.finalPrice * this.item.quantity;
-			if(this.editable("period")) { this.setPeriod(new Date); }
+			if(this.editable("period")) {
+				var newDate = new Date();
+				newDate.setDate(1);
+				newDate.setHours(0, 0, 0, 0);
+				var finalDate = new Date(newDate);
+				this.virtualPeriod.push(finalDate);
+				this.setPeriod(this.virtualPeriod);
+			}
 		},
 		methods: {
 			visible(column) { return this.fields.includes(column); },
 			editable(column) {
 				return this.fields.includes(column+":edit") && !this.readOnly.includes(column) && !this.show;
+			},
+			removable() {
+				return (this.fields.includes("name:remove")||this.fields.includes("name:edit:remove")) && !this.show && this.item.addons.length==0;
 			},
 			newAddon() {
 				this.$emit('new-addon', {
