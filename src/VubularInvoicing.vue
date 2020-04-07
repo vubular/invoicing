@@ -10,6 +10,7 @@
 				@toggled="toggleState"></invoice-toggle>
 			<invoice-content v-if="showContent"
 				:show="showState"
+				:vat="vat"
 				:fields="fields"
 				:features="features"
 				:content.sync="content"
@@ -24,11 +25,9 @@
 				:features="features"
 				:goods="goods"
 				@selected="addItem"></invoice-cart>
-			<invoice-total v-if="showTotal"
-				:show="showState"
-				:vat="vat"
-				:features="features"
-				:content.sync="content"></invoice-total>
+			<invoice-total
+				:content="content"
+				:vat="vat"></invoice-total>
 		</div>
 	</div>
 </template>
@@ -36,8 +35,8 @@
 	import InvoiceLabel from "./partials/Label.vue";
 	import InvoiceToggle from "./partials/Toggle.vue";
 	import InvoiceContent from './views/Content.vue';
-	import InvoiceCart from './partials/Cart';
-	import InvoiceTotal from './partials/Total';
+	import InvoiceCart from './partials/Cart.vue';
+	import InvoiceTotal from './partials/Total.vue';
 	export default {
 		name: 'VubularInvoicing',
 		components: { InvoiceLabel, InvoiceToggle, InvoiceContent, InvoiceCart, InvoiceTotal },
@@ -61,7 +60,7 @@
 			},
 			fields: {
 				type: String,
-				default: "name,price,quantity:edit,discount:edit,totalVat"
+				default: "name:remove,price,quantity:edit,discount:edit,totalVat"
 			},
 			features: {
 				type: String,
@@ -198,7 +197,7 @@
 			showContent() { return this.content && this.content.length>0; },
 			showCart() { return this.features.includes("cart") && !this.showState; },
 			showContentRow() { return this.showLabel || this.showToggle || this.showContent },
-			showTotalRow() { return this.showTotal || this.showCart },
+			showTotalRow() { return this.showTotal || this.showCart }
 		}
 	}
 </script>

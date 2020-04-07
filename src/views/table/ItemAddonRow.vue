@@ -1,5 +1,5 @@
 <template>
-	<tr v-if="validAddon">
+	<tr v-if="validInvoiceItem(addon)">
 		<td class="has-text-grey has-text-weight-light">{{counter}}</td>
 		<td v-if="visible('name')">
 			{{addonName}}
@@ -96,7 +96,7 @@
 	<tr v-else>
 		<td class="has-text-grey has-text-weight-light">{{counter}}</td>
 		<td>
-			<div v-if="addonSet && !validAddon" class="is-inline-block has-text-grey" style="margin-right:15px">
+			<div v-if="addonSet && !validInvoiceItem(addon)" class="is-inline-block has-text-grey" style="margin-right:15px">
 				<i class="fal fa-exclamation-square"></i>
 				Invalid addon!
 			</div>
@@ -154,9 +154,6 @@
 			editable(column) {
 				return this.fields.includes(column+":edit") && !this.readOnly.includes(column) && !this.show;
 			},
-			removable() {
-				return (this.fields.includes("name:remove")||this.fields.includes("name:edit:remove")) && !this.show;
-			},
 			setAddon(addon) {
 				this.$emit('set-addon', {
 					itemKey: this.itemKey,
@@ -207,7 +204,7 @@
 			snapshot() { return this.addon && this.addon.snapshot ? this.addon.snapshot : null; },
 			addonName() {
 				var name = "";
-				if(!this.validAddon) return name;
+				if(!this.validInvoiceItem(this.addon)) return name;
 				name = this.addon ? this.addon.name : "";
 				if(this.snapshot && this.snapshot.label) name = this.snapshot.label;
 				if(this.addon && this.addon.variant) name = `${name} ${this.addon.variant.label}`;
@@ -231,78 +228,11 @@
 			price: {
 				cache: false,
 				get() {
-					if(!this.addonSet) return 0;
-
-					var price = this.addon.price ?? 0;
-					if(!this.validAddon) return price;
-
-					if(this.snapshot && price==this.snapshot.price) {
-						if(this.snapshot && this.snapshot.tiers && this.snapshot.tiers.length>0) {
-							this.snapshot.tiers.filter((tier) => {
-								if(tier.quantity <= this.addon.quantity && tier.price) {
-									price = tier.price;
-								}
-							})
-						}
-
-						if(this.addon.variant && this.addon.variant.price) {
-							price = this.addon.variant.price;
-						}
-					}
-
-					var withoutVat = price, withVat = price;
-					var vat = 0;
-					var discount = 0, discountAfterVat = 0;
-					var increase = 0, increaseAfterVat = 0;
-
-					if(this.addon.vat.included && this.addon.vat.amount>0) {
-						var vatDivider = +("1." + this.addon.vat.amount);
-						vat = price - (price / vatDivider);
-						withoutVat = price - vat;
-					}
-
-					if(!this.addon.vat.included && this.addon.vat.amount>0) {
-						vat = (price/100) * this.addon.vat.amount;
-						withVat = price + vat;
-					}
-
-					var discounted = withoutVat, discountedAfterVat = withVat;
-					var finalPrice = withVat;
-
-					if(this.addon.discount && this.addon.discount>0) {
-						discount = (withoutVat/100) * this.addon.discount;
-						discounted = withoutVat - discount;
-
-						discountAfterVat = (withVat/100) * this.addon.discount;
-						discountedAfterVat = withVat - discountAfterVat;
-						finalPrice = discountedAfterVat;
-					}
-
-					var increased = withoutVat, increasedAfterVat = withVat;
-
-					if(this.addon.discount && this.addon.discount<0) {
-						increase = (withoutVat/100) * (this.addon.discount * (-1));
-						increased = withoutVat + increase;
-
-						increaseAfterVat = (withVat/100) * (this.addon.discount * (-1));
-						increasedAfterVat = +withVat + +increaseAfterVat;
-						finalPrice = increasedAfterVat;
-					}
-
-					if(this.addon.period) {
-						var dates = this.addon.period.split(", ");
-						if(dates.length>1) finalPrice = finalPrice * dates.length;
-					}
-
-					return { price, discount, discounted, discountedAfterVat, increase, increased, increasedAfterVat, vat, withVat, withoutVat, finalPrice }
+					return this.getPrice(this.addon);
 				}
 			},
-			validAddon() {
-				return this.addon &&
-					"price" in this.addon &&
-					"quantity" in this.addon &&
-					"discount" in this.addon &&
-					"vat" in this.addon
+			removable() {
+				return (this.fields.includes("name:remove") || this.fields.includes("name:edit:remove")) && !this.show;
 			}
 		}
 	}

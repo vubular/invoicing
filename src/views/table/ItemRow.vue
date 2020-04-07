@@ -1,5 +1,5 @@
 <template>
-	<tr v-if="validItem">
+	<tr v-if="validInvoiceItem(item)">
 		<td class="has-text-grey has-text-weight-light">{{counter}}</td>
 		<td v-if="visible('name')">
 			{{itemName}}
@@ -168,9 +168,6 @@
 			editable(column) {
 				return this.fields.includes(column+":edit") && !this.readOnly.includes(column) && !this.show;
 			},
-			removable() {
-				return (this.fields.includes("name:remove")||this.fields.includes("name:edit:remove")) && !this.show && this.item.addons.length==0;
-			},
 			newAddon() {
 				this.$emit('new-addon', {
 					itemKey: this.itemKey,
@@ -253,7 +250,7 @@
 			snapshot() { return this.item && this.item.snapshot ? this.item.snapshot : null; },
 			itemName() {
 				var name = "";
-				if(!this.validItem) return name;
+				if(!this.validInvoiceItem(this.item)) return name;
 
 				name = this.item.name ?? this.snapshot.name;
 				if(this.item.variant) name = `${name} ${this.item.variant.label}`;
@@ -261,7 +258,7 @@
 			},
 			offer() {
 				var offer = "N/A";
-				if(!this.validItem) return offer;
+				if(!this.validInvoiceItem(this.item)) return offer;
 				if(this.item && this.item.offer) offer = `${this.item.offer.coupon} (${this.item.offer.discount}%)`;
 				return offer;
 			},
@@ -275,71 +272,11 @@
 			price: {
 				cache: false,
 				get() {
-					var price = this.item.price ?? 0;
-					if(!this.validItem) return price;
-
-					if(this.snapshot && price==this.snapshot.price) {
-						if(this.snapshot && this.snapshot.tiers && this.snapshot.tiers.length>0) {
-							this.snapshot.tiers.filter((tier) => {
-								if(tier.quantity <= this.item.quantity && tier.price) {
-									price = tier.price;
-								}
-							})
-						}
-
-						if(this.item.variant && this.item.variant.price) {
-							price = this.item.variant.price;
-						}
-					}
-
-					var withoutVat = price, withVat = price;
-					var vat = 0;
-					var discount = 0, discountAfterVat = 0;
-					var increase = 0, increaseAfterVat = 0;
-
-					if(this.item.vat.included && this.item.vat.amount>0) {
-						var vatDivider = +("1." + this.item.vat.amount);
-						vat = price - (price / vatDivider);
-						withoutVat = price - vat;
-					}
-
-					if(!this.item.vat.included && this.item.vat.amount>0) {
-						vat = (price/100) * this.item.vat.amount;
-						withVat = price + vat;
-					}
-
-					var discounted = withoutVat, discountedAfterVat = withVat;
-					var finalPrice = withVat;
-
-					if(this.item.discount && this.item.discount>0) {
-						discount = (withoutVat/100) * this.item.discount;
-						discounted = withoutVat - discount;
-
-						discountAfterVat = (withVat/100) * this.item.discount;
-						discountedAfterVat = withVat - discountAfterVat;
-						finalPrice = discountedAfterVat;
-					}
-
-					var increased = withoutVat, increasedAfterVat = withVat;
-
-					if(this.item.discount && this.item.discount<0) {
-						increase = (withoutVat/100) * (this.item.discount * (-1));
-						increased = withoutVat + increase;
-
-						increaseAfterVat = (withVat/100) * (this.item.discount * (-1));
-						increasedAfterVat = +withVat + +increaseAfterVat;
-						finalPrice = increasedAfterVat;
-					}
-
-					return { price, discount, discounted, discountedAfterVat, increase, increased, increasedAfterVat, vat, withVat, withoutVat, finalPrice }
+					return this.getPrice(this.item);
 				}
 			},
-			validItem() {
-				return this.item &&
-					"price" in this.item &&
-					"quantity" in this.item &&
-					"discount" in this.item &&
-					"vat" in this.item
+			removable() {
+				return (this.fields.includes("name:remove") || this.fields.includes("name:edit:remove")) && !this.show && this.item.addons.length==0;
 			}
 		},
 		watch: {
