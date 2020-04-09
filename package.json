@@ -1,6 +1,6 @@
 {
   "name": "@vubular/invoicing",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "Simple invoicing solution",
   "main": "src/index.js",
   "scripts": {
@@ -8,8 +8,7 @@
     "build": "vue-cli-service build"
   },
   "dependencies": {
-    "vue": "^2.6.11",
-    "buefy": "^0.8.12"
+    "@vubular/elements": "^0.0.4"
   },
   "repository": {
     "type": "git",
