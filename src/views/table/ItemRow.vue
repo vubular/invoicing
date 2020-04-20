@@ -36,7 +36,8 @@
 			<!-- <b-numberinput v-if="editable('quantity')"
 				v-model="item.quantity"
 				size="is-small"
-				min="1" step="1"
+				:min="minQuantity"
+				:max="maxQuantity" step="1"
 				@input="updateVirtualTotal"
 				icon-pack="fal"></b-numberinput>
 			<font v-else>{{item.quantity}}</font> -->
@@ -117,8 +118,10 @@
 				@input="adaptDiscount"
 				size="is-small"
 				icon-pack="fal"
-				min="0"
-				step="0.01"></b-numberinput>
+				:min="minVirtualTotalVat"
+				:max="maxVirtualTotalVat"
+				step="0.01"
+				:key="virtualTotalVat"></b-numberinput>
 			<font v-else>{{virtualTotalVat | pricing}}</font>
 		</td>
 	</tr>
@@ -147,13 +150,21 @@
 			return {
 				virtualPeriod: [],
 				virtualDiscount: 0,
+				oldVirtualDiscount: 0,
 				virtualTotalVat: 0,
+				oldVirtualTotalVat: 0,
+				oldQuantity: 1,
 				readOnly: ""
 			}
 		},
-		mounted() {
+		beforeMount() {
 			this.virtualDiscount = this.item.discount;
+			this.oldVirtualDiscount = this.item.discount;
+
 			this.virtualTotalVat = this.price.finalPrice * this.item.quantity;
+			this.oldVirtualTotalVat = this.price.finalPrice * this.item.quantity;
+			this.oldQuantity = this.item.quantity;
+
 			if(this.editable("period")) {
 				var newDate = new Date();
 				newDate.setDate(1);
@@ -164,6 +175,7 @@
 			}
 		},
 		methods: {
+			hasFeature(feature) { return this.features.includes(feature); },
 			visible(column) { return this.fields.includes(column); },
 			editable(column) {
 				return this.fields.includes(column+":edit") && !this.readOnly.includes(column) && !this.show;
@@ -190,6 +202,7 @@
 					pers.push(this.dayjs(period).format("MM/YYYY"));
 				}
 
+				this.oldQuantity = this.item.quantity;
 				this.item.quantity = this.arrayUnique(pers).length;
 				pers = this.arrayUnique(pers).join(", ");
 
@@ -221,6 +234,20 @@
 					return;
 				}
 
+				if(this.hasFeature("decreaseOnly")) {
+					if(this.virtualTotalVat>this.oldVirtualTotalVat) {
+						this.resetVirtualTotal();
+						return;
+					}
+				}
+
+				if(this.hasFeature("increaseOnly")) {
+					if(this.virtualTotalVat<this.oldVirtualTotalVat) {
+						this.resetVirtualTotal();
+						return;
+					}
+				}
+
 				var currentTotal = this.price.withVat * this.item.quantity;
 
 				if(currentTotal!=0) {
@@ -243,6 +270,10 @@
 				this.item.discount = 0;
 				this.virtualDiscount = 0;
 				this.virtualTotalVat = this.price.finalPrice * this.item.quantity;
+			},
+			resetVirtualTotal() {
+				this.virtualTotalVat = this.oldVirtualTotalVat;
+				this.$forceUpdate();
 			}
 		},
 		computed: {
@@ -277,6 +308,38 @@
 			},
 			removable() {
 				return (this.fields.includes("name:remove") || this.fields.includes("name:edit:remove")) && !this.show && this.item.addons.length==0;
+			},
+			minVirtualTotalVat() {
+				var minVirtualTotalVat = 0;
+				if(this.hasFeature("increaseOnly")) {
+					minVirtualTotalVat = this.oldVirtualTotalVat;
+				}
+
+				return minVirtualTotalVat;
+			},
+			maxVirtualTotalVat() {
+				var maxVirtualTotalVat = 99999999;
+				if(this.hasFeature("decreaseOnly")) {
+					maxVirtualTotalVat = this.oldVirtualTotalVat;
+				}
+
+				return maxVirtualTotalVat;
+			},
+			minQuantity() {
+				var minQuantity = 1;
+				if(this.hasFeature("increaseOnly")) {
+					minQuantity = this.oldQuantity;
+				}
+
+				return minQuantity;
+			},
+			maxQuantity() {
+				var maxQuantity = 99999999;
+				if(this.hasFeature("decreaseOnly")) {
+					maxQuantity = this.oldQuantity;
+				}
+
+				return maxQuantity;
 			}
 		},
 		watch: {

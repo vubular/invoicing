@@ -24,11 +24,13 @@
 		<td v-if="visible('period')" :key="addon.period">{{addon.period}}</td>
 		<td v-if="visible('quantity')">
 			<b-numberinput v-if="editable('quantity')"
-						   v-model="addon.quantity"
-						   size="is-small"
-						   @input="updateVirtualTotal"
-						   min="1" step="1"
-						   icon-pack="fal"></b-numberinput>
+				v-model="addon.quantity"
+				size="is-small"
+				@input="updateVirtualTotalByQuantity"
+				:min="minQuantity"
+				:max="maxQuantity"
+				step="1"
+				icon-pack="fal"></b-numberinput>
 			<font v-else>{{addon.quantity}}</font>
 		</td>
 		<td v-if="visible('unit')" class="is-capitalized">
@@ -88,7 +90,8 @@
 				@input="adaptDiscount"
 				size="is-small"
 				icon-pack="fal"
-				min="0"
+				:min="minVirtualTotalVat"
+				:max="maxVirtualTotalVat"
 				step="0.01"></b-numberinput>
 			<font v-else>{{virtualTotalVat | pricing}}</font>
 		</td>
@@ -131,7 +134,10 @@
 			return {
 				addonSet: false,
 				virtualDiscount: 0,
+				oldVirtualDiscount: 0,
 				virtualTotalVat: 0,
+				oldVirtualTotalVat: 0,
+				oldQuantity: 1,
 				readOnly: ""
 			}
 		},
@@ -193,11 +199,38 @@
 
 				this.$forceUpdate();
 			},
+			updateVirtualTotalByQuantity() {
+				this.$forceUpdate();
+
+				if(this.hasFeature("decreaseOnly")) {
+					if(this.quantity>this.oldQuantity) {
+						this.resetQuantity();
+						return;
+					}
+				}
+
+				if(this.hasFeature("increaseOnly")) {
+					if(this.quantity<this.oldQuantity) {
+						this.resetQuantity();
+						return;
+					}
+				}
+
+				this.virtualTotalVat = this.price.finalPrice * this.addon.quantity;
+			},
 			updateVirtualTotal() {
 				this.$forceUpdate();
 				// this.addon.discount = 0;
 				// this.virtualDiscount = 0;
 				this.virtualTotalVat = this.price.finalPrice * this.addon.quantity;
+			},
+			resetVirtualTotal() {
+				this.virtualTotalVat = this.oldVirtualTotalVat;
+				this.$forceUpdate();
+			},
+			resetQuantity() {
+				this.quantity = this.oldQuantity;
+				this.$forceUpdate();
 			}
 		},
 		computed: {
@@ -233,6 +266,38 @@
 			},
 			removable() {
 				return (this.fields.includes("name:remove") || this.fields.includes("name:edit:remove")) && !this.show;
+			},
+			minVirtualTotalVat() {
+				var minVirtualTotalVat = 0;
+				if(this.hasFeature("increaseOnly")) {
+					minVirtualTotalVat = this.oldVirtualTotalVat;
+				}
+
+				return minVirtualTotalVat;
+			},
+			maxVirtualTotalVat() {
+				var maxVirtualTotalVat = 99999999;
+				if(this.hasFeature("decreaseOnly")) {
+					maxVirtualTotalVat = this.oldVirtualTotalVat;
+				}
+
+				return maxVirtualTotalVat;
+			},
+			minQuantity() {
+				var minQuantity = 1;
+				if(this.hasFeature("increaseOnly")) {
+					minQuantity = this.oldQuantity;
+				}
+
+				return minQuantity;
+			},
+			maxQuantity() {
+				var maxQuantity = 99999999;
+				if(this.hasFeature("decreaseOnly")) {
+					maxQuantity = this.oldQuantity;
+				}
+
+				return maxQuantity;
 			}
 		}
 	}
