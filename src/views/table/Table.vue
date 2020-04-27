@@ -1,6 +1,6 @@
 <template>
 	<div class="column is-12">
-		<div class="invoice-content">
+		<div class="invoice-content" style="border:1px solid #dbdbdb;max-height:600px;overflow:auto">
 			<table v-if="content.length>0" class="table is-striped is-bordered is-fullwidth">
 				<thead>
 					<tr>

@@ -2,7 +2,8 @@
 	<tr v-if="validInvoiceItem(item)">
 		<td class="has-text-grey has-text-weight-light">{{counter}}</td>
 		<td v-if="visible('name')">
-			{{itemName}}
+			<div style="white-space: nowrap;overflow: hidden;text-overflow: ellipsis;max-width:300px;float:left;margin-right:10px" :title="itemName">{{itemName}}</div>
+			</v-container>
 			<button v-if="snapshot.addons && snapshot.addons.length>0 && !this.show"
 				type="button"
 				class="button is-small"
@@ -307,7 +308,7 @@
 				}
 			},
 			removable() {
-				return (this.fields.includes("name:remove") || this.fields.includes("name:edit:remove")) && !this.show && this.item.addons.length==0;
+				return (this.fields.includes("name:remove") || this.fields.includes("name:edit:remove"));
 			},
 			minVirtualTotalVat() {
 				var minVirtualTotalVat = 0;

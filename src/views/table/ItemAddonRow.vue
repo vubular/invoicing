@@ -156,6 +156,7 @@
 			}
 		},
 		methods: {
+			hasFeature(feature) { return this.features.includes(feature); },
 			visible(column) { return this.fields.includes(column); },
 			editable(column) {
 				return this.fields.includes(column+":edit") && !this.readOnly.includes(column) && !this.show;

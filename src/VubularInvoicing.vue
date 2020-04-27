@@ -3,7 +3,7 @@
 		<div v-if="showContentRow" class="columns is-multiline">
 			<invoice-label v-if="showLabel"
 				:show="showState"
-				:label="label"></invoice-label>
+				:label="label + ' ('+content.length+')'"></invoice-label>
 			<invoice-toggle v-if="showToggle"
 				:show="showState"
 				:disabled="content.length==0"
@@ -94,6 +94,14 @@
 						{ label: "Services", icon: "fa fa-cubes", component: "", },
 						{ label: "Products", icon: "fa fa-shapes", component: "", }
 					]
+				}
+			},
+			rawItems: { type: Array }
+		},
+		mounted() {
+			if(this.rawItems && Array.isArray(this.rawItems) && this.rawItems.length>0) {
+				for(var i = 0;i<this.rawItems.length;i++) {
+					this.addItem(this.rawItems[i]);
 				}
 			}
 		},
