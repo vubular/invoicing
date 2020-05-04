@@ -22,9 +22,10 @@
 				</div>
 			</div>
 		</div>
-		<div v-if="browsing!=null" class="border-highlight" style="margin-top: 15px;1px dashed #ddd;padding:20px">
+		<div v-if="browsing!=null" class="border-highlight" style="margin-top: 15px;1px dashed #ddd;padding:20px;position:relative">
 			<button type="button"
-				class="button is-pulled-right"
+				class="button"
+				style="position:absolute;right:20px;top:20px"
 				@click="cancelBrowsing"><i class="fal fa-times"></i></button>
 			<component v-bind:is="browsing"
 				:customer="customer"

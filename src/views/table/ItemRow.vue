@@ -34,15 +34,15 @@
 			<font v-else>{{item.period}}</font>
 		</td>
 		<td v-if="visible('quantity')">
-			<!-- <b-numberinput v-if="editable('quantity')"
+			<b-numberinput v-if="editable('quantity') && item.unit!='Month'"
 				v-model="item.quantity"
 				size="is-small"
 				:min="minQuantity"
 				:max="maxQuantity" step="1"
 				@input="updateVirtualTotal"
 				icon-pack="fal"></b-numberinput>
-			<font v-else>{{item.quantity}}</font> -->
-			<font>{{item.quantity}}</font>
+			<font v-else>{{item.quantity}}</font>
+			<!-- <font>{{item.quantity}}</font> -->
 		</td>
 		<td v-if="visible('unit')" class="is-capitalized">
 			<b-select v-if="editable('unit')" v-model="item.unit" placeholder="Change unit" size="is-small">
@@ -346,10 +346,15 @@
 		watch: {
 			"item.offer": function (newValue, oldValue) {
 				if(newValue && newValue!=oldValue) {
-					if(newValue) {
-						this.item.quantity = newValue.quantity;
-						this.item.discount = newValue.discount;
-						this.readOnly = this.readOnly + "quantity,discount,";
+					this.item.quantity = newValue.quantity;
+					this.item.discount = newValue.discount;
+					this.readOnly = this.readOnly + "quantity,discount,";
+				}
+			},
+			"item.quantity": function (newValue, oldValue) {
+				if(newValue && newValue!=oldValue) {
+					if(this.item.snapshot.stock && newValue>this.item.snapshot.stock) {
+						this.item.quantity = +JSON.stringify(this.item.snapshot.stock);
 					}
 				}
 			}

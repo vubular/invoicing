@@ -10,7 +10,6 @@
 				@toggled="toggleState"></invoice-toggle>
 			<invoice-content v-if="showContent"
 				:show="showState"
-				:vat="vat"
 				:fields="fields"
 				:features="features"
 				:content.sync="content"
@@ -25,7 +24,8 @@
 				:features="features"
 				:goods="goods"
 				@selected="addItem"></invoice-cart>
-			<invoice-total
+			<div v-if="!showCart && showTotal" class="column"></div>
+			<invoice-total v-if="showTotal"
 				:content="content"
 				:vat="vat"></invoice-total>
 		</div>
@@ -140,7 +140,7 @@
 				this.$emit("item-addon-removed", this.content[addon.itemKey]);
 			},
 			prepareItem(item) {
-				if(item && item.snapshot) return item;
+				if(this.validInvoiceItem(item) && item.snapshot) return item;
 
 				var newItemVat = this.vat;
 				if(this.customer && this.customer.customVat) newItemVat = this.customer.customVat;

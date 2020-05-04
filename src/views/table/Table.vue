@@ -1,12 +1,12 @@
 <template>
 	<div class="column is-12">
-		<div class="invoice-content" style="border:1px solid #dbdbdb;max-height:600px;overflow:auto">
+		<div class="invoice-content" :style="compactStyle">
 			<table v-if="content.length>0" class="table is-striped is-bordered is-fullwidth">
 				<thead>
 					<tr>
 						<th class="is-narrow has-text-grey has-text-weight-light">+</th>
 						<th v-if="fields.includes('name')">Name</th>
-						<th v-if="fields.includes('idlist')" class="is-narrow">ID List</th>
+						<th v-if="fields.includes('idlist')" class="is-narrow" style="width:200px">ID List</th>
 						<th v-if="fields.includes('period')" class="is-narrow">Period</th>
 						<th v-if="fields.includes('quantity')" class="is-narrow">Quantity</th>
 						<th v-if="fields.includes('unit')" class="is-narrow">Unit</th>
@@ -63,6 +63,9 @@
 		computed: {
 			vatWidth() {
 				return (this.fields.includes("vat:edit") && !this.show) ? "width:210px" : "";
+			},
+			compactStyle() {
+				return this.content.length>9 ? "border:1px solid #dbdbdb;max-height:600px;overflow:auto" : "";
 			}
 		}
 	}
