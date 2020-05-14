@@ -117,7 +117,22 @@
 			},
 			addItem(item) {
 				this.$emit("item-added", item);
-				this.content.push({...this.prepareItem(item)});
+				if(this.allowDuplicates || this.content.length==0) {
+					this.content.push({...this.prepareItem(item)});
+				} else {
+					var newItem = {...this.prepareItem(item)};
+					var duplicateFound = false; var d = 0;
+					this.content.filter(contentItem => {
+						d++;
+						if(!duplicateFound && contentItem.snapshot.id==newItem.snapshot.id) {
+							contentItem.quantity++;
+							duplicateFound = true;
+						}
+						if(d==this.content.length && !duplicateFound) {
+							this.content.push(newItem);
+						}
+					})
+				}
 			},
 			removeItem(item) {
 				this.$emit("item-removed", item.value);
@@ -205,7 +220,8 @@
 			showContent() { return this.content && this.content.length>0; },
 			showCart() { return this.features.includes("cart") && !this.showState; },
 			showContentRow() { return this.showLabel || this.showToggle || this.showContent },
-			showTotalRow() { return this.showTotal || this.showCart }
+			showTotalRow() { return this.showTotal || this.showCart },
+			allowDuplicates() { return this.features.includes("duplicate"); },
 		}
 	}
 </script>

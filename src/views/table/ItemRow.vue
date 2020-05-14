@@ -33,6 +33,7 @@
 			<b-datepicker v-if="editable('period')" v-model="virtualPeriod" @input="setPeriod" type="month" icon-pack="fa" icon="calendar-alt" size="is-small"  multiple></b-datepicker>
 			<font v-else>{{item.period}}</font>
 		</td>
+		<td v-if="visible('stock')">{{stock}}</td>
 		<td v-if="visible('quantity')">
 			<b-numberinput v-if="editable('quantity') && item.unit!='Month'"
 				v-model="item.quantity"
@@ -279,7 +280,8 @@
 		},
 		computed: {
 			minimumDate() { var md = new Date(); return new Date(md.setDate(0)); },
-			snapshot() { return this.item && this.item.snapshot ? this.item.snapshot : null; },
+			snapshot: { cache: false, get() { return this.item && this.item.snapshot ? this.item.snapshot : null; } },
+			stock: { cache: false, get() { return this.snapshot && this.snapshot.stock ? this.snapshot.stock : 0 }  },
 			itemName() {
 				var name = "";
 				if(!this.validInvoiceItem(this.item)) return name;
@@ -326,21 +328,33 @@
 
 				return maxVirtualTotalVat;
 			},
-			minQuantity() {
-				var minQuantity = 1;
-				if(this.hasFeature("increaseOnly")) {
-					minQuantity = this.oldQuantity;
-				}
+			minQuantity: {
+				cache: false,
+				get() {
+					var minQuantity = 1;
+					if(this.hasFeature("increaseOnly")) {
+						minQuantity = this.oldQuantity;
+					}
+					if(this.hasFeature("stockOnly") && this.stock==0) {
+						minQuantity = 0;
+					}
 
-				return minQuantity;
+					return minQuantity;
+				}
 			},
-			maxQuantity() {
-				var maxQuantity = 99999999;
-				if(this.hasFeature("decreaseOnly")) {
-					maxQuantity = this.oldQuantity;
-				}
+			maxQuantity: {
+				cache: false,
+				get() {
+					var maxQuantity = 99999999;
+					if(this.hasFeature("stockOnly") && this.stock) {
+						maxQuantity = this.stock;
+					}
+					if(this.hasFeature("decreaseOnly")) {
+						maxQuantity = this.oldQuantity;
+					}
 
-				return maxQuantity;
+					return maxQuantity;
+				}
 			}
 		},
 		watch: {
@@ -353,8 +367,11 @@
 			},
 			"item.quantity": function (newValue, oldValue) {
 				if(newValue && newValue!=oldValue) {
-					if(this.item.snapshot.stock && newValue>this.item.snapshot.stock) {
-						this.item.quantity = +JSON.stringify(this.item.snapshot.stock);
+					if(newValue>this.maxQuantity) {
+						this.item.quantity = +JSON.stringify(this.maxQuantity);
+					}
+					if(newValue<this.minQuantity) {
+						this.item.quantity = +JSON.stringify(this.minQuantity);
 					}
 				}
 			}

@@ -22,6 +22,7 @@
 			<font v-else>{{idlist}}</font>
 		</td>
 		<td v-if="visible('period')" :key="addon.period">{{addon.period}}</td>
+		<td v-if="visible('stock')"></td>
 		<td v-if="visible('quantity')">
 			<b-numberinput v-if="editable('quantity')"
 				v-model="addon.quantity"
