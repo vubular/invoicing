@@ -3,7 +3,7 @@
 		<table class="table is-striped is-bordered">
 			<tbody>
 				<tr>
-					<td><strong>{{'Total' | translate}}</strong></td>
+					<td><strong><plain v-if="draft">{{label}}</plain> {{'Total' | translate}}</strong></td>
 					<td class="has-text-right">{{grandTotal(content).withoutVat | pricing}}</td>
 				</tr>
 				<tr>
@@ -33,7 +33,13 @@
 <script>
 	export default {
 		name: "TotalTable",
-		props: ["content", "vat"]
+		props: ["content", "vat", "label", "draft"]
 	}
 </script>
-<style scoped>.table { border-top: 5px solid #e4e4e4; } .column.total-table td { width: 150px }</style>
+<style scoped>
+	.table { border-top: 5px solid #e4e4e4; }
+	.column.total-table td { width: 170px }
+	.column.highlight table,.column.highlight table td { border-color: #7956d5; }
+	.column.lowlight table,.column.lowlight table td { border-color: #eee; color: #888; }
+	.column.lowlight strong { color: #888; }
+</style>

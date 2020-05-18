@@ -3,12 +3,23 @@
 		<div v-if="showContentRow" class="columns is-multiline">
 			<invoice-label v-if="showLabel"
 				:show="showState"
-				:label="label + ' ('+content.length+')'"></invoice-label>
+				:label="theLabel"></invoice-label>
 			<invoice-toggle v-if="showToggle"
 				:show="showState"
 				:disabled="content.length==0"
 				@toggled="toggleState"></invoice-toggle>
-			<invoice-content v-if="showContent"
+			<div v-if="validDraft" class="column is-12" style="padding-bottom:0">
+				<div class="is-pulled-left">
+					<tabs :tabs="[label, draftLabel]" @active="activeTab => { tab=activeTab }"></tabs>
+				</div>
+			</div>
+			<invoice-content v-if="showDraft" show
+				:key="draftLabel"
+				:fields="draftFields"
+				:features="features"
+				:content="draft"></invoice-content>
+			<invoice-content v-if="showContent && !showDraft"
+				:key="label"
 				:show="showState"
 				:fields="fields"
 				:features="features"
@@ -26,8 +37,16 @@
 				@selected="addItem"></invoice-cart>
 			<div v-if="!showCart && showTotal" class="column"></div>
 			<invoice-total v-if="showTotal"
+				:label="label"
+				:draft="validDraft"
 				:content="content"
 				:vat="vat"></invoice-total>
+			<invoice-total v-if="showTotal && validDraft"
+				:label="draftLabel"
+				:draft="validDraft"
+				:content="draft"
+				:vat="vat"
+				class="lowlight"></invoice-total>
 		</div>
 	</div>
 </template>
@@ -45,6 +64,10 @@
 				type: String,
 				default: "Invoice"
 			},
+			draftLabel: {
+				type: String,
+				default: "Draft"
+			},
 			vat: {
 				type: Object,
 				default() {
@@ -59,6 +82,10 @@
 				default: false
 			},
 			fields: {
+				type: String,
+				default: "name:remove,price,quantity:edit,discount:edit,totalVat"
+			},
+			draftFields: {
 				type: String,
 				default: "name:remove,price,quantity:edit,discount:edit,totalVat"
 			},
@@ -80,6 +107,12 @@
 					}
 				}
 			},
+			draft: {
+				type: Array,
+				default() {
+					return []
+				}
+			},
 			content: {
 				type: Array,
 				default() {
@@ -99,6 +132,7 @@
 			rawItems: { type: Array }
 		},
 		mounted() {
+			if(this.validDraft) this.tab = this.label;
 			if(this.rawItems && Array.isArray(this.rawItems) && this.rawItems.length>0) {
 				for(var i = 0;i<this.rawItems.length;i++) {
 					this.addItem(this.rawItems[i]);
@@ -107,7 +141,8 @@
 		},
 		data() {
 			return {
-				toggled: false
+				toggled: false,
+				tab: null
 			}
 		},
 		methods: {
@@ -217,11 +252,22 @@
 			showLabel() { return this.label!="hide"; },
 			showTotal() { return this.features.includes("total") && this.content && this.content.length>0; },
 			showToggle() { return this.features.includes("toggle"); },
+			showDraft() { return this.validDraft && this.tab==this.draftLabel; },
 			showContent() { return this.content && this.content.length>0; },
 			showCart() { return this.features.includes("cart") && !this.showState; },
 			showContentRow() { return this.showLabel || this.showToggle || this.showContent },
 			showTotalRow() { return this.showTotal || this.showCart },
 			allowDuplicates() { return this.features.includes("duplicate"); },
+			validDraft() { return this.draft && this.draft.length>0; },
+			theLabel() {
+				var label = this.label;
+				if(this.content.length>0) {
+					label += "("+this.content.length;
+					if(this.validDraft) label+="/"+this.draft.length;
+					label += ")";
+				}
+				return label;
+			}
 		}
 	}
 </script>
