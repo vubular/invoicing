@@ -91,7 +91,7 @@
 			},
 			features: {
 				type: String,
-				default: "toggle,cart"
+				default: "toggle,cart,duplicate"
 			},
 			customer: {
 				type: Object,
