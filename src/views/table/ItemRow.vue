@@ -167,8 +167,15 @@
 			this.oldVirtualTotalVat = this.price.finalPrice * this.item.quantity;
 			this.oldQuantity = this.item.quantity;
 
+			var parsingDate = new Date();
+			if(this.editable("period") && this.item.period) {
+				var parsingMonth = this.item.period.split("/").shift()+"/01/";
+				var parsingYear = this.item.period.split("/").pop();
+				parsingDate = parsingMonth+parsingYear;
+			}
+
 			if(this.editable("period")) {
-				var newDate = new Date();
+				var newDate = new Date(Date.parse(parsingDate));
 				newDate.setDate(1);
 				newDate.setHours(0, 0, 0, 0);
 				var finalDate = new Date(newDate);
