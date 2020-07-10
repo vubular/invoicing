@@ -16,8 +16,8 @@
 			<invoice-content v-if="showDraft" show
 				:key="draftLabel"
 				:fields="draftFields"
-				:features="features"
-				:content="draft"></invoice-content>
+				:content="draft"
+				features=""></invoice-content>
 			<invoice-content v-if="showContent && !showDraft"
 				:key="label"
 				:show="showState"
@@ -27,7 +27,8 @@
 				@new-addon="addItemAddon"
 				@set-addon="setItemAddon"
 				@remove-addon="removeItemAddon"
-				@remove-item="removeItem"></invoice-content>
+				@remove-item="removeItem"
+				@idlistChosen="idlistChosenReEmit"></invoice-content>
 		</div>
 		<div v-if="showTotalRow" class="columns">
 			<invoice-cart v-if="showCart"
@@ -87,7 +88,7 @@
 			},
 			draftFields: {
 				type: String,
-				default: "name:remove,price,quantity:edit,discount:edit,totalVat"
+				default: "name,price,quantity,discount,totalVat"
 			},
 			features: {
 				type: String,
@@ -245,6 +246,9 @@
 					offer: null,
 					attributes: []
 				}
+			},
+			idlistChosenReEmit(payload) {
+				this.$emit("idlistChosen", payload);
 			}
 		},
 		computed: {

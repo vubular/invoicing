@@ -6,7 +6,7 @@
 					<tr>
 						<th class="is-narrow has-text-grey has-text-weight-light">+</th>
 						<th v-if="fields.includes('name')">Name</th>
-						<th v-if="fields.includes('idlist')" class="is-narrow" style="width:200px">ID List</th>
+						<th v-if="fields.includes('idlist')" class="is-narrow">ID List</th>
 						<th v-if="fields.includes('period')" class="is-narrow">Period</th>
 						<th v-if="fields.includes('stock')" class="is-narrow">Stock</th>
 						<th v-if="fields.includes('quantity')" class="is-narrow">Quantity</th>

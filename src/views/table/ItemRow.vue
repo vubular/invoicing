@@ -23,11 +23,32 @@
 		</td>
 		<td v-if="visible('idlist')">
 			<div v-if="editable('idlist')">
-				<input v-if="item.quantity==1" class="input is-small" v-model="item.idlist"/>
-				<textarea v-if="item.quantity>1 && item.quantity<=10" class="textarea is-small" v-model="item.idlist" :rows="item.quantity"></textarea>
-				<input v-if="item.quantity>10" type="file" />
+				<input v-if="item.quantity==1" class="input is-small" v-model="item.idlist" style="width:200px"/>
+				<textarea v-if="item.quantity>1 && item.quantity<=10" class="textarea is-small" v-model="item.idlist" :rows="item.quantity" style="width:200px"></textarea>
+				<b-upload v-if="item.quantity>10 && !item.idlist" @input="idlistFileChosen" class="file">
+					<a class="button is-primary is-small">
+						<span class="icon"><i class="fa fa-upload"></i></span>
+						<span>Click to upload</span>
+					</a>
+				</b-upload>
+				<a v-if="item.idlist && item.idlist.includes('/file/')"
+					:href="item.idlist"
+					class="button is-primary is-small"
+					target="_blank">
+					<span class="icon"><i class="fa fa-download"></i></span>
+					<span>Download</span>
+				</a>
 			</div>
-			<font v-else>{{item.idlist}}</font>
+			<template v-else>
+				<a v-if="item.idlist && item.idlist.includes('/file/')"
+					:href="item.idlist"
+					class="button is-primary is-small"
+					target="_blank">
+					<span class="icon"><i class="fa fa-download"></i></span>
+					<span>Download</span>
+				</a>
+				<font v-else>{{item.idlist}}</font>
+			</template>
 		</td>
 		<td v-if="visible('period')">
 			<b-datepicker v-if="editable('period')" v-model="virtualPeriod" @input="setPeriod" type="month" icon-pack="fa" icon="calendar-alt" size="is-small"  multiple></b-datepicker>
@@ -283,6 +304,9 @@
 			resetVirtualTotal() {
 				this.virtualTotalVat = this.oldVirtualTotalVat;
 				this.$forceUpdate();
+			},
+			idlistFileChosen(file) {
+				this.$emit("idlistChosen", { file, item: this.item })
 			}
 		},
 		computed: {

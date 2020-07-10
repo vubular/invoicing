@@ -47,6 +47,12 @@ export default {
 						withVat = price + vat;
 					}
 
+					if(item.vat && (!item.vat.included && !item.vat.amount) && Number(item.vat)) {
+						var vatDivider = +("1." + item.vat);
+						vat = price - (price / vatDivider);
+						withoutVat = price - vat;
+					}
+
 					var discounted = withoutVat, discountedAfterVat = withVat;
 					var finalPrice = withVat;
 

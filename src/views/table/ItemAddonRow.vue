@@ -15,11 +15,32 @@
 		</td>
 		<td v-if="visible('idlist')">
 			<div v-if="editable('idlist')">
-				<input v-if="addon.quantity==1" class="input" v-model="addon.idlist"/>
-				<textarea v-if="addon.quantity>1 && addon.quantity<=10" class="textarea" v-model="addon.idlist"></textarea>
-				<input v-if="addon.quantity>10" type="file" />
+				<input v-if="addon.quantity==1" class="input is-small" v-model="addon.idlist" style="width:200px"/>
+				<textarea v-if="addon.quantity>1 && addon.quantity<=10" class="textarea is-small" v-model="addon.idlist" :rows="addon.quantity" style="width:200px"></textarea>
+				<b-upload v-if="addon.quantity>10 && !addon.idlist" @input="idlistFileChosen" class="file">
+					<a class="button is-primary is-small">
+						<span class="icon"><i class="fa fa-upload"></i></span>
+						<span>Click to upload</span>
+					</a>
+				</b-upload>
+				<a v-if="addon.idlist && addon.idlist.includes('/file/')"
+					:href="addon.idlist"
+					class="button is-primary is-small"
+					target="_blank">
+					<span class="icon"><i class="fa fa-download"></i></span>
+					<span>Download</span>
+				</a>
 			</div>
-			<font v-else>{{idlist}}</font>
+			<template v-else>
+				<a v-if="addon.idlist && addon.idlist.includes('/file/')"
+					:href="addon.idlist"
+					class="button is-primary is-small"
+					target="_blank">
+					<span class="icon"><i class="fa fa-download"></i></span>
+					<span>Download</span>
+				</a>
+				<font v-else>{{addon.idlist}}</font>
+			</template>
 		</td>
 		<td v-if="visible('period')" :key="addon.period">{{addon.period}}</td>
 		<td v-if="visible('stock')"></td>
@@ -233,6 +254,9 @@
 			resetQuantity() {
 				this.quantity = this.oldQuantity;
 				this.$forceUpdate();
+			},
+			idlistFileChosen(file) {
+				this.$emit("idlistChosen", { file, item: this.addon })
 			}
 		},
 		computed: {
