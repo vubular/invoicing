@@ -3,7 +3,6 @@
 		<td class="has-text-grey has-text-weight-light">{{counter}}</td>
 		<td v-if="visible('name')">
 			<div style="white-space: nowrap;overflow: hidden;text-overflow: ellipsis;max-width:300px;float:left;margin-right:10px" :title="itemName">{{itemName}}</div>
-			</v-container>
 			<button v-if="snapshot.addons && snapshot.addons.length>0 && !this.show"
 				type="button"
 				class="button is-small"
