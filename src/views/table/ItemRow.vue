@@ -3,7 +3,7 @@
 		<td class="has-text-grey has-text-weight-light">{{counter}}</td>
 		<td v-if="visible('name')">
 			<div style="white-space: nowrap;overflow: hidden;text-overflow: ellipsis;max-width:300px;float:left;margin-right:10px" :title="itemName">{{itemName}}</div>
-			<button v-if="snapshot.addons && snapshot.addons.length>0 && !this.show"
+			<button v-if="snapshot && snapshot.addons && snapshot.addons.length>0 && !this.show"
 				type="button"
 				class="button is-small"
 				@click="newAddon"> + Addon </button>
@@ -316,8 +316,10 @@
 				var name = "";
 				if(!this.validInvoiceItem(this.item)) return name;
 
-				name = this.item.name ?? this.snapshot.name;
-				if(this.item.variant) name = `${name} ${this.item.variant.label}`;
+				if(this.snapshot && this.snapshot.name) name = this.snapshot.name;
+				if(this.item && this.item.name) name = this.item.name;
+
+				if(this.item && this.item.variant && this.item.variant.label) name = `${name} ${this.item.variant.label}`;
 				return name;
 			},
 			offer() {
