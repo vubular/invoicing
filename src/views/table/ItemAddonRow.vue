@@ -15,8 +15,16 @@
 		</td>
 		<td v-if="visible('idlist')">
 			<div v-if="editable('idlist')">
-				<input v-if="addon.quantity==1" class="input is-small" v-model="addon.idlist" style="width:200px"/>
-				<textarea v-if="addon.quantity>1 && addon.quantity<=10" class="textarea is-small" v-model="addon.idlist" :rows="addon.quantity" style="width:200px"></textarea>
+				<b-taginput
+				 	v-if="addon.quantity<=10"
+					v-model="addon.idlist"
+					:maxtags="addon.quantity"
+					icon="barcode"
+					icon-pack="fa"
+					placeholder="Scan"
+					style="width:200px"
+					v-on="$listeners"
+					/>
 				<b-upload v-if="addon.quantity>10 && !addon.idlist" @input="idlistFileChosen" class="file">
 					<a class="button is-primary is-small">
 						<span class="icon"><i class="fa fa-upload"></i></span>
@@ -39,7 +47,10 @@
 					<span class="icon"><i class="fa fa-download"></i></span>
 					<span>Download</span>
 				</a>
-				<font v-else>{{addon.idlist}}</font>
+				<font v-else>
+					<plain v-if="Array.isArray(addon.idlist)">{{addon.idlist.join(",")}}</plain>
+					<plain v-else>{{addon.idlist}}</plain>
+				</font>
 			</template>
 		</td>
 		<td v-if="visible('period')" :key="addon.period">{{addon.period}}</td>

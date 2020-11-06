@@ -22,8 +22,16 @@
 		</td>
 		<td v-if="visible('idlist')">
 			<div v-if="editable('idlist')">
-				<input v-if="item.quantity==1" class="input is-small" v-model="item.idlist" style="width:200px"/>
-				<textarea v-if="item.quantity>1 && item.quantity<=10" class="textarea is-small" v-model="item.idlist" :rows="item.quantity" style="width:200px"></textarea>
+				<b-taginput
+				 	v-if="item.quantity<=10"
+					v-model="item.idlist"
+					:maxtags="item.quantity"
+					icon="barcode"
+					icon-pack="fa"
+					placeholder="Scan"
+					style="width:200px"
+					v-on="$listeners"
+					/>
 				<b-upload v-if="item.quantity>10 && !item.idlist" @input="idlistFileChosen" class="file">
 					<a class="button is-primary is-small">
 						<span class="icon"><i class="fa fa-upload"></i></span>
@@ -46,7 +54,10 @@
 					<span class="icon"><i class="fa fa-download"></i></span>
 					<span>Download</span>
 				</a>
-				<font v-else>{{item.idlist}}</font>
+				<font v-else>
+					<plain v-if="Array.isArray(item.idlist)">{{item.idlist.join(",")}}</plain>
+					<plain v-else>{{item.idlist}}</plain>
+				</font>
 			</template>
 		</td>
 		<td v-if="visible('period')">
@@ -55,15 +66,16 @@
 		</td>
 		<td v-if="visible('stock')">{{stock}}</td>
 		<td v-if="visible('quantity')">
-			<b-numberinput v-if="editable('quantity') && item.unit!='Month'"
+			<b-numberinput
+				v-if="editable('quantity') && item.unit!='Month'"
 				v-model="item.quantity"
 				size="is-small"
 				:min="minQuantity"
 				:max="maxQuantity" step="1"
 				@input="updateVirtualTotal"
-				icon-pack="fal"></b-numberinput>
+				icon-pack="fal"
+				/>
 			<font v-else>{{item.quantity}}</font>
-			<!-- <font>{{item.quantity}}</font> -->
 		</td>
 		<td v-if="visible('unit')" class="is-capitalized">
 			<b-select v-if="editable('unit')" v-model="item.unit" placeholder="Change unit" size="is-small">
