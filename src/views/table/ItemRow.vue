@@ -155,7 +155,8 @@
 				:min="minVirtualTotalVat"
 				:max="maxVirtualTotalVat"
 				step="0.01"
-				:key="virtualTotalVat"></b-numberinput>
+				:key="virtualTotalVat"
+				ref="focusTotal"></b-numberinput>
 			<font v-else>{{virtualTotalVat | pricing}}</font>
 		</td>
 	</tr>
@@ -299,6 +300,10 @@
 				}
 
 				this.$forceUpdate();
+
+				this.$nextTick(() => {
+				  this.$refs.focusTotal.focus();
+				})
 			},
 			updateVirtualTotal() {
 				this.$forceUpdate();
