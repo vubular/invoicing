@@ -2,7 +2,7 @@
 	<div class="column">
 		<div class="dropdown" :class="{'is-active': active}">
 			<div class="dropdown-trigger">
-				<button type="button" class="button is-success is-outlined" @click="active=!active">
+				<button type="button" class="button is-success is-outlined" @click="active=!active" v-if="singleCreate">
 					<span class="icon"><i class="fal fa-shopping-cart"></i></span>
 					<span>Add Items</span>
 					<span class="icon is-small">
@@ -49,6 +49,10 @@
 						{ label: "Products", icon: "fa fa-shapes", component: "", }
 					]
 				}
+			},
+			singleCreate: {
+				type: Boolean,
+				default: true
 			}
 		},
 		data() {

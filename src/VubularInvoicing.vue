@@ -35,6 +35,7 @@
 				:customer="customer"
 				:features="features"
 				:goods="goods"
+				:singleCreate="singleCreate"
 				@selected="addItem"></invoice-cart>
 			<div v-if="!showCart && showTotal" class="column"></div>
 			<invoice-total v-if="showTotal"
@@ -130,7 +131,8 @@
 					]
 				}
 			},
-			rawItems: { type: Array }
+			rawItems: { type: Array },
+			singleCreate: { type: Boolean, default: true }
 		},
 		mounted() {
 			if(this.validDraft) this.tab = this.label;
