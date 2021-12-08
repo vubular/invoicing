@@ -110,12 +110,14 @@ export default {
 			}
 		});
 
-		Vue.filter('pricing', function (value = null) {
+		Vue.filter('pricing', function (value = null) {	
+			var getSettings = JSON.parse(localStorage.getItem("albismart:home"));
+			var currency = getSettings.settings.currency.symbol;
 			value = +value;
-			if(!Number(value)) return "0.00 €";
-			if(value==null) return "0.00 €";
-			if(Number(value)==0) return "0.00 €";
-			return value ? value.toFixed(2) + " €" : "0.00 €";
+			if(!Number(value)) return "0.00 "+currency;
+			if(value==null) return "0.00 "+currency;
+			if(Number(value)==0) return "0.00 "+currency;
+			return value ? value.toFixed(2) + " "+currency : "0.00 "+currency;
 		});
 
 		Vue.filter('percentage', function (value) {
