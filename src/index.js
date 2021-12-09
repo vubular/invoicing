@@ -111,8 +111,14 @@ export default {
 		});
 
 		Vue.filter('pricing', function (value = null) {		
-			var getSettings = JSON.parse(localStorage.getItem("albismart:environments"));
-			var currency = getSettings[0].settings.currency.symbol;
+			var getHome = JSON.parse(localStorage.getItem("albismart:home"));
+			var getEnv = JSON.parse(localStorage.getItem("albismart:environments"));
+			var currency = null;
+			if(getEnv.length==0) {
+				currency = getHome.settings.currency.symbol;
+			} else {
+				currency = getEnv[0].settings.currency.symbol;
+			}
 			value = +value;
 			if(!Number(value)) return "0.00 "+currency;
 			if(value==null) return "0.00 "+currency;
