@@ -97,15 +97,20 @@ export default {
 											}
 										}
 										vat += addonVat;
+										vat = vat - (vat * (addon.discount/100));
 										withVat += addonWithVat;
 									}
 								})
+							} else {
+								vat = vat - (vat * (item.discount/100));	
 							}
 						});
 					}
 
 					var withoutVat = withVat - vat;
-					return { withoutVat, vat, withVat };
+					var beforeTaxes = withVat / (content[0].vat.amount ? "1."+content[0].vat.amount : 1.0);
+					var taxes = withVat - withVat / (content[0].vat.amount ? "1."+content[0].vat.amount : 1.0);
+					return { withoutVat, vat, withVat, beforeTaxes, taxes };
 				}
 			}
 		});

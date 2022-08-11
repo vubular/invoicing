@@ -16,11 +16,19 @@
 				</tr>
 				<tr>
 					<td><strong>{{'Before taxes' | translate}}</strong></td>
-					<td class="has-text-right">{{grandTotal(content).withoutVat | pricing}}</td>
+					<!-- <td class="has-text-right">{{grandTotal(content).withoutVat | pricing}}</td> -->
+
+					<!-- updated -->
+					<td class="has-text-right">{{grandTotal(content).beforeTaxes | pricing}}</td>	
+					<!-- updated -->	
 				</tr>
 				<tr>
 					<td><strong>{{'Taxes' | translate}} ({{vat.amount}}%)</strong></td>
-					<td class="has-text-right">{{grandTotal(content).vat | pricing}}</td>
+					<!-- <td class="has-text-right">{{grandTotal(content).vat | pricing}}</td> -->
+
+					<!-- updated -->
+					<td class="has-text-right">{{grandTotal(content).taxes | pricing}}</td>	
+					<!-- updated -->
 				</tr>
 				<tr>
 					<td><strong>{{'Grand Total' | translate}}</strong></td>
