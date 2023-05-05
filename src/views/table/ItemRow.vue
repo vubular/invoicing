@@ -416,9 +416,9 @@
 			},
 			"item.quantity": function (newValue, oldValue) {
 				if(newValue && newValue!=oldValue) {
-					if(newValue>this.maxQuantity) {
-						this.item.quantity = +JSON.stringify(this.maxQuantity);
-					}
+					// if(newValue>this.maxQuantity) {
+					// 	this.item.quantity = +JSON.stringify(this.maxQuantity);
+					// }
 					if(newValue<this.minQuantity) {
 						this.item.quantity = +JSON.stringify(this.minQuantity);
 					}
