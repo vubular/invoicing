@@ -29,6 +29,7 @@
 				@click="cancelBrowsing"><i class="fal fa-times"></i></button>
 			<component v-bind:is="browsing"
 				:customer="customer"
+				:filters="filters"
 				@selected="selectGood"
 				@cancel="cancelBrowsing"></component>
 		</div>
@@ -40,6 +41,7 @@
 		props: {
 			customer: { type: Object },
 			features: { type: String },
+			filters: { type: Array },
 			goods: {
 				type: Array,
 				default() {

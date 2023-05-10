@@ -36,6 +36,7 @@
 				:features="features"
 				:goods="goods"
 				:singleCreate="singleCreate"
+				:filters="filters"
 				@selected="addItem"></invoice-cart>
 			<div v-if="!showCart && showTotal" class="column"></div>
 			<invoice-total v-if="showTotal"
@@ -79,6 +80,7 @@
 					}
 				}
 			},
+			filters: Array,
 			show: {
 				type: Boolean,
 				default: false
