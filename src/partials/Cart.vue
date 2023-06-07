@@ -30,6 +30,7 @@
 			<component v-bind:is="browsing"
 				:customer="customer"
 				:filters="filters"
+				@getOptions="getOptions"
 				@selected="selectGood"
 				@cancel="cancelBrowsing"></component>
 		</div>
@@ -77,6 +78,9 @@
 					this.$emit("selected", good);
 					this.cancelBrowsing();
 				}
+			},
+			getOptions(item) {
+				this.$emit("getOptions", item);
 			}
 		}
 	}

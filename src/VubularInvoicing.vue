@@ -24,6 +24,7 @@
 				:fields="fields"
 				:features="features"
 				:content.sync="content"
+				:availableOptions="availableOptions"
 				@new-addon="addItemAddon"
 				@set-addon="setItemAddon"
 				@remove-addon="removeItemAddon"
@@ -37,6 +38,7 @@
 				:goods="goods"
 				:singleCreate="singleCreate"
 				:filters="filters"
+				@getOptions="getOptions"
 				@selected="addItem"></invoice-cart>
 			<div v-if="!showCart && showTotal" class="column"></div>
 			<invoice-total v-if="showTotal"
@@ -81,6 +83,7 @@
 				}
 			},
 			filters: Array,
+			availableOptions: Array,
 			show: {
 				type: Boolean,
 				default: false
@@ -154,6 +157,9 @@
 			toggleState() {
 				this.toggled = !this.toggled;
 				this.$emit('toggled', this.toggled);
+			},
+			getOptions(item) {
+				this.$emit("getOptions", item);
 			},
 			addItem(item) {
 				this.$emit("item-added", item);

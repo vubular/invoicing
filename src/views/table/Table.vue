@@ -27,6 +27,7 @@
 						:counter="i+1"
 						:fields="fields"
 						:features="features"
+						:availableOptions="availableOptions"
 						v-on="$listeners"></invoice-item-row>
 					<invoice-item-addon-row v-if="item.addons.length>0"
 						v-for="(addon, a) in item.addons" :key="i+'.'+a+item.period"
@@ -54,6 +55,7 @@
 			show: { type: Boolean },
 			fields: { type: String },
 			features: { type: String },
+			availableOptions: { type: Array },
 			content: {
 				type: Array,
 				default() {

@@ -3,6 +3,7 @@
 		:fields="fields"
 		:features="features"
 		:content.sync="content"
+		:availableOptions="availableOptions"
 		v-on="$listeners"></invoice-table-view>
 </template>
 <script>
@@ -19,7 +20,8 @@
 				default() {
 					return []
 				}
-			}
-		}
+			},
+			availableOptions: { type: Array }
+		}	
 	}
 </script>

@@ -24,14 +24,20 @@
 			<div v-if="editable('idlist')">
 				<b-taginput
 				 	v-if="item.quantity<=10"
+				 	:data="filteredOptions"
 					v-model="item.idlist"
 					:maxtags="item.quantity"
+					open-on-focus
 					icon="barcode"
 					icon-pack="fa"
 					placeholder="Scan"
 					style="width:200px"
+					@typing="getFilteredOptions"
 					v-on="$listeners"
 					/>
+				<span class="is-block">
+					<span class="tag is-warning is-light">{{ availableOptions.length }} {{'Available Idlists' | translate}}</span>
+				</span>
 				<b-upload v-if="item.quantity>10 && !item.idlist" @input="idlistFileChosen" class="file">
 					<a class="button is-primary is-small">
 						<span class="icon"><i class="fa fa-upload"></i></span>
@@ -179,7 +185,13 @@
 			features: { type: String },
 			item: { type: Object },
 			counter: { type: [ String, Number ] },
-			addons: { type: Array }
+			addons: { type: Array },
+			availableOptions: { 
+				type: Array, 
+				default() {
+					return []
+				}
+			}
 		},
 		data() {
 			return {
@@ -189,7 +201,8 @@
 				virtualTotalVat: 0,
 				oldVirtualTotalVat: 0,
 				oldQuantity: 1,
-				readOnly: ""
+				readOnly: "",
+				filteredOptions: this.availableOptions 
 			}
 		},
 		beforeMount() {
@@ -221,6 +234,14 @@
 			visible(column) { return this.fields.includes(column); },
 			editable(column) {
 				return this.fields.includes(column+":edit") && !this.readOnly.includes(column) && !this.show;
+			},
+			getFilteredOptions(text) {
+			    this.filteredOptions = this.availableOptions.filter((option) => {
+			        return option
+			            .toString()
+			            .toLowerCase()
+			            .indexOf(text.toLowerCase()) >= 0
+			    })
 			},
 			newAddon() {
 				this.$emit('new-addon', {
