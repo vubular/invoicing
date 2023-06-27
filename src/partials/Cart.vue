@@ -4,7 +4,7 @@
 			<div class="dropdown-trigger">
 				<button type="button" class="button is-success is-outlined" @click="active=!active" v-if="singleCreate">
 					<span class="icon"><i class="fal fa-shopping-cart"></i></span>
-					<span>Add Items</span>
+					<span>{{'Add Items' | translate}}</span>
 					<span class="icon is-small">
 						<i class="fas fa-angle-down" aria-hidden="true"></i>
 					</span>
@@ -17,7 +17,7 @@
 						@click="browseGoods(good)"
 						:key="g">
 						<span v-if="good.icon" class="icon"><i :class="good.icon"></i></span>
-						<span v-if="good.label">{{good.label}}</span>
+						<span v-if="good.label">{{good.label | translate}}</span>
 					</a>
 				</div>
 			</div>
