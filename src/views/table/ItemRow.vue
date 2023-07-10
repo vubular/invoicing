@@ -20,6 +20,9 @@
 				style="margin-top:10px"></textarea>
 			<font v-else>{{item.description}}</font>
 		</td>
+		<td v-if="visible('indexes')">
+	          <span v-if="item && item.snapshot && item.snapshot.indexes && item.snapshot.indexes.navision">{{item.snapshot.indexes.navision}}</span>
+		</td>
 		<td v-if="visible('idlist')">
 			<div v-if="editable('idlist')">
 				<b-taginput
