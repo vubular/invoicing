@@ -36,6 +36,7 @@
 					placeholder="Scan"
 					style="width:200px"
 					autocomplete
+					allow-new
 					@typing="getFilteredOptions"
 					v-on="$listeners"
 					/>
