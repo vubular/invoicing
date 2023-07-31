@@ -35,6 +35,7 @@
 					icon-pack="fa"
 					placeholder="Scan"
 					style="width:200px"
+					autocomplete
 					@typing="getFilteredOptions"
 					v-on="$listeners"
 					/>
