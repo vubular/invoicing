@@ -37,6 +37,7 @@
 					style="width:200px"
 					autocomplete
 					allow-new
+					@blur="settleIdlist"
 					@typing="getFilteredOptions"
 					v-on="$listeners"
 					/>
@@ -349,6 +350,13 @@
 			},
 			idlistFileChosen(file) {
 				this.$emit("idlistChosen", { file, item: this.item })
+			},
+			settleIdlist(e) {
+				if(!this.item.idlist || this.item.idlist.length==0) {
+					if(e.target.value!="") {
+						this.item.idlist = [e.target.value];
+					}
+				}
 			}
 		},
 		computed: {
