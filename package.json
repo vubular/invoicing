@@ -1,6 +1,6 @@
 {
   "name": "@vubular/invoicing",
-  "version": "0.0.35",
+  "version": "0.0.36",
   "description": "Simple invoicing solution",
   "main": "src/index.js",
   "scripts": {

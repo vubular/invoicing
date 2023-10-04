@@ -23,6 +23,17 @@
 		<td v-if="visible('indexes')">
 	          <span v-if="item && item.snapshot && item.snapshot.indexes && item.snapshot.indexes.navision">{{item.snapshot.indexes.navision}}</span>
 		</td>
+		<td v-if="visible('condition')">
+			<b-dropdown aria-role="list">
+			    <template #trigger="{ active }">
+			        <b-button type="button" class="is-capitalized" :icon-right="active ? 'menu-up' : 'menu-down'">
+			           {{ item.condition }} 
+			        </b-button>
+			    </template>
+			    <b-dropdown-item aria-role="listitem" @click="item.condition = 'new'"> New </b-dropdown-item>
+			    <b-dropdown-item aria-role="listitem" @click="item.condition = 'used'"> Used </b-dropdown-item>
+			</b-dropdown>
+		</td>
 		<td v-if="visible('idlist')">
 			<div v-if="editable('idlist')">
 				<b-taginput
