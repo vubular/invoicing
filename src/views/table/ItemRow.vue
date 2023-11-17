@@ -42,6 +42,7 @@
 					v-model="item.idlist"
 					:maxtags="item.quantity"
 					open-on-focus
+					keep-first
 					icon="barcode"
 					icon-pack="fa"
 					placeholder="Scan"
