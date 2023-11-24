@@ -43,6 +43,7 @@
 					:maxtags="item.quantity"
 					open-on-focus
 					keep-first
+					append-to-body
 					icon="barcode"
 					icon-pack="fa"
 					placeholder="Scan"
