@@ -51,6 +51,7 @@
 					autocomplete
 					allow-new
 					@blur="settleIdlist"
+					@input="emitChanges"
 					@typing="getFilteredOptions"
 					v-on="$listeners"
 					/>
@@ -370,6 +371,9 @@
 						this.item.idlist = [e.target.value];
 					}
 				}
+			},
+			emitChanges() {
+				this.$emit("setIdlist");
 			}
 		},
 		computed: {

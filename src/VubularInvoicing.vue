@@ -29,7 +29,8 @@
 				@set-addon="setItemAddon"
 				@remove-addon="removeItemAddon"
 				@remove-item="removeItem"
-				@idlistChosen="idlistChosenReEmit"></invoice-content>
+				@idlistChosen="idlistChosenReEmit"
+				v-on="$listeners"></invoice-content>
 		</div>
 		<div v-if="showTotalRow" class="columns">
 			<invoice-cart v-if="showCart"
