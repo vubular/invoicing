@@ -56,7 +56,7 @@
 					v-on="$listeners"
 					/>
 				<span class="is-block">
-					<span class="tag is-warning is-light">{{ availableOptions.length==0 ? "No Available Idlist" : "Available Idlist" }}</span>
+					<span class="tag is-warning is-light">{{ filteredOptions.length==0 ? "No Available Idlist" : "Available Idlist" }}</span>
 				</span>
 				<b-upload v-if="item.quantity>10 && !item.idlist" @input="idlistFileChosen" class="file">
 					<a class="button is-primary is-small">
@@ -222,7 +222,7 @@
 				oldVirtualTotalVat: 0,
 				oldQuantity: 1,
 				readOnly: "",
-				filteredOptions: this.availableOptions 
+				filteredOptions: this.item.snapshot.idlist
 			}
 		},
 		beforeMount() {
@@ -256,7 +256,7 @@
 				return this.fields.includes(column+":edit") && !this.readOnly.includes(column) && !this.show;
 			},
 			getFilteredOptions(text) {
-			    this.filteredOptions = this.availableOptions.filter((option) => {
+			    this.filteredOptions = this.item.snapshot.idlist.filter((option) => {
 			        return option
 			            .toString()
 			            .toLowerCase()
