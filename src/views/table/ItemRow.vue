@@ -35,15 +35,16 @@
 			</b-dropdown>
 		</td>
 		<td v-if="visible('idlist')">
-			<div v-if="editable('idlist')">
+			<div v-if="editable('idlist')" style="max-height: 450px; overflow-y: auto;">
 				<b-taginput
-				 	v-if="item.quantity<=10"
 				 	:data="filteredOptions"
 					v-model="item.idlist"
 					:maxtags="item.quantity"
 					open-on-focus
 					keep-first
 					append-to-body
+					ref="taginput"
+					class="my-4"
 					icon="barcode"
 					icon-pack="fa"
 					placeholder="Scan"
@@ -53,17 +54,29 @@
 					@blur="settleIdlist"
 					@input="emitChanges"
 					@typing="getFilteredOptions"
-					v-on="$listeners"
-					/>
+					v-on="$listeners">
+					  <template slot="selected" slot-scope="props">
+					    <b-tag
+					    v-for="(tag, index) in props.tags"
+					    :key="index"
+					    :type="checkTag(tag)"
+					    :tabstop="false"
+					    ellipsis
+					    closable
+					    @close="$refs.taginput.removeTag(index, $event); resolveLastTag();">
+					    {{tag}}
+					  </b-tag>
+					</template>
+				</b-taginput>
 				<span class="is-block">
 					<span class="tag is-warning is-light">{{ filteredOptions && filteredOptions.length==0 ? "No Available Idlist" : "Available Idlist" }}</span>
 				</span>
-				<b-upload v-if="item.quantity>10 && !item.idlist" @input="idlistFileChosen" class="file">
+<!-- 				<b-upload v-if="item.quantity>10 && !item.idlist" @input="idlistFileChosen" class="file">
 					<a class="button is-primary is-small">
 						<span class="icon"><i class="fa fa-upload"></i></span>
 						<span>Click to upload</span>
 					</a>
-				</b-upload>
+				</b-upload> -->
 				<a v-if="item.idlist && item.idlist.includes('/file/')"
 					:href="item.idlist"
 					class="button is-primary is-small"
@@ -85,6 +98,8 @@
 					<plain v-else>{{item.idlist}}</plain>
 				</font>
 			</template>
+			<button type="button" @click="removeAll" class="button is-small is-danger is-light m-2" :disabled="item && item.idlist && item.idlist.length<10 || !item.idlist"> <i class="fa fa-times mr-1"> </i> Remove all </button>
+			<button type="button" @click="removeMissings" class="button is-small is-danger is-light m-2" :disabled="ui.wrongIdlist"> <i class="fa fa-times mr-1"> </i> Remove missings </button>
 		</td>
 		<td v-if="visible('period')">
 			<b-datepicker v-if="editable('period')" v-model="virtualPeriod" @input="setPeriod" type="month" icon-pack="fa" icon="calendar-alt" size="is-small"  multiple></b-datepicker>
@@ -215,6 +230,9 @@
 		},
 		data() {
 			return {
+				ui: {
+					wrongIdlist: true
+				},
 				virtualPeriod: [],
 				virtualDiscount: 0,
 				oldVirtualDiscount: 0,
@@ -375,6 +393,50 @@
 			},
 			emitChanges() {
 				this.$emit("setIdlist");
+			},
+			removeAll() {
+				this.item.idlist = [];
+				this.ui.wrongIdlist = true;
+			},
+			removeDuplicates(content) {
+				return content.reduce(function(a,b){
+					if (a.indexOf(b) < 0 ) a.push(b);
+					return a;
+				},[]);
+			},
+			checkTag(tag) {
+				if(this.item?.snapshot?.idlist && !this.item.snapshot.idlist.includes(tag) && this.item.snapshot.identifier==true) {
+					this.ui.wrongIdlist = false;
+					return 'is-danger is-light';
+				} else {
+					return 'is-success is-light';
+				}
+			},
+			resolveLastTag() {
+				let checkIfLast = [];
+				if(this.item.idlist.length==0) {
+					this.ui.wrongIdlist = true;
+					return;
+				}
+				for (var i = this.item.idlist.length - 1; i >= 0; i--) {
+					if(this.item.snapshot.idlist && !this.item.snapshot.idlist.includes(this.item.idlist[i])) {
+						checkIfLast.push(this.item.idlist[i]);
+					}
+					if(i==0) {
+						if(checkIfLast.length==0) {
+							this.ui.wrongIdlist = true;
+						}
+					}	
+				}
+			},
+			removeMissings() {
+				if(!this.item.idlist) return;
+				for (var i = this.item.idlist.length - 1; i >= 0; i--) {
+					if(this.checkTag(this.item.idlist[i])=='is-danger is-light') {
+						this.item.idlist.splice(i, 1);
+					}
+				}
+				this.ui.wrongIdlist = true;
 			}
 		},
 		computed: {
@@ -459,6 +521,36 @@
 			}
 		},
 		watch: {
+			"item.idlist": function (newValue, oldValue) {
+				if(newValue!=oldValue && newValue!=null) {
+					if(newValue.length!=0 && newValue[newValue.length-1].includes(" ")) {
+						var values = newValue[newValue.length-1].split(" ");
+						this.item.idlist.splice(newValue.length-1, 1);
+						setTimeout(() => {
+							values.forEach((val) => {
+								this.item.idlist.push(val.split(":").join(""));
+							})
+							this.item.idlist = this.removeDuplicates(this.item.idlist);
+							this.item.quantity = this.item.idlist.length;
+						}, 200)
+					} else if(newValue.length!=0 && newValue[newValue.length-1].includes(",")) {
+						var values = newValue[newValue.length-1].split(",");
+						this.item.idlist.splice(newValue.length-1, 1);
+						setTimeout(() => {
+							values.forEach((val) => {
+								this.item.idlist.push(val.split(":").join(""));
+							})
+							this.item.idlist = this.removeDuplicates(this.item.idlist);
+							this.item.quantity = this.item.idlist.length;
+						}, 200)
+					}
+				}
+			},
+			"ui.wrongIdlist": function(newValue, oldValue) {
+				if(newValue!=oldValue) {
+					this.$emit("notifyWrongIdlist", this.ui.wrongIdlist);
+				}
+			},
 			"item.offer": function (newValue, oldValue) {
 				if(newValue && newValue!=oldValue) {
 					this.item.quantity = newValue.quantity;
