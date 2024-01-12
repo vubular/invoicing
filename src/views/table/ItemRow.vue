@@ -30,8 +30,8 @@
 			           {{ item.condition }} 
 			        </b-button>
 			    </template>
-			    <b-dropdown-item aria-role="listitem" @click="item.condition = 'new'"> New </b-dropdown-item>
-			    <b-dropdown-item aria-role="listitem" @click="item.condition = 'used'"> Used </b-dropdown-item>
+			    <b-dropdown-item aria-role="listitem" @click="updateCondition('new')"> New </b-dropdown-item>
+			    <b-dropdown-item aria-role="listitem" @click="updateCondition('used')"> Used </b-dropdown-item>
 			</b-dropdown>
 		</td>
 		<td v-if="visible('idlist')">
@@ -437,6 +437,10 @@
 					}
 				}
 				this.ui.wrongIdlist = true;
+			},
+			updateCondition(cond) {
+				this.item.condition = cond;
+				this.$emit("updatedCondition");
 			}
 		},
 		computed: {
