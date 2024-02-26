@@ -446,7 +446,12 @@
 		computed: {
 			minimumDate() { var md = new Date(); return new Date(md.setDate(0)); },
 			snapshot: { cache: false, get() { return this.item && this.item.snapshot ? this.item.snapshot : null; } },
-			stock: { cache: false, get() { return this.snapshot && this.snapshot.stock ? this.snapshot.stock : 0 }  },
+			stock: { 
+				cache: false, 
+				get() { 
+					return (this.snapshot && this.snapshot.stock && this.item.condition=='new') ? this.snapshot.stock : (this.snapshot && this.snapshot.usedStock && this.item.condition=='used') ? this.snapshot.usedStock : 0;
+				}
+			},
 			itemName() {
 				var name = "";
 				if(!this.validInvoiceItem(this.item)) return name;
