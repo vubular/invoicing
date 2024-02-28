@@ -1,27 +1,27 @@
 <template>
 	<tr v-if="validInvoiceItem(item)">
 		<td class="has-text-grey has-text-weight-light">{{counter}}</td>
-    <td v-if="visible('name')">
-      <div style="display: flex; justify-content: space-between">
-        <div style="white-space: nowrap;overflow: hidden;text-overflow: ellipsis;max-width:300px;float:left;margin-right:10px" :title="itemName">{{itemName}}</div>
-        <button v-if="removable"
-          type="button"
-          class="button is-small is-pulled-right has-text-danger"
-          @click="removeItem">
-          <i class="fal fa-times"></i>
-        </button>
-      </div>
-      <button v-if="snapshot && snapshot.addons && snapshot.addons.length>0 && !this.show"
-        type="button"
-        class="button is-small"
-        @click="newAddon"> + Addon </button>
-      <textarea v-if="editable('description')"
-        class="textarea is-small"
-        v-model="item.description"
-        rows="1"
-        style="margin-top:10px"></textarea>
-      <font v-else>{{item.description}}</font>
-    </td>
+		<td v-if="visible('name')">
+			<div style="display: flex; justify-content: space-between">
+				<div style="white-space: nowrap;overflow: hidden;text-overflow: ellipsis;max-width:300px;float:left;margin-right:10px" :title="itemName">{{itemName}}</div>
+				<button v-if="removable"
+					type="button"
+					class="button is-small is-pulled-right has-text-danger"
+					@click="removeItem">
+					<i class="fal fa-times"></i>
+				</button>
+			</div>
+			<button v-if="snapshot && snapshot.addons && snapshot.addons.length>0 && !this.show"
+				type="button"
+				class="button is-small"
+				@click="newAddon"> + Addon </button>
+			<textarea v-if="editable('description')"
+				class="textarea is-small"
+				v-model="item.description"
+				rows="1"
+				style="margin-top:10px"></textarea>
+			<font v-else>{{item.description}}</font>
+		</td>
 		<td v-if="visible('indexes')">
 	          <span v-if="item && item.snapshot && item.snapshot.indexes && item.snapshot.indexes.navision">{{item.snapshot.indexes.navision}}</span>
 		</td>
@@ -112,8 +112,8 @@
 			<b-numberinput
 				v-if="editable('quantity') && item.unit!='Month'"
 				v-model="item.quantity"
-        controls-position="compact"
-        style="margin: 2px 0 0"
+		        controls-position="compact"
+		        style="margin: 2px 0 0"
 				size="is-small"
 				:min="minQuantity"
 				:max="maxQuantity" step="1"
@@ -131,8 +131,8 @@
 		<td v-if="visible('price')">
 			<b-numberinput v-if="editable('price')"
 				v-model="item.price"
-        controls-position="compact"
-        style="margin: 2px 0 0"
+		        controls-position="compact"
+		        style="margin: 2px 0 0"
 				size="is-small"
 				icon-pack="fal"
 				min="0"
@@ -163,8 +163,8 @@
 			<b-numberinput v-if="editable('discount')"
 				v-model="virtualDiscount"
 				@input="setDiscount"
-        controls-position="compact"
-        style="margin: 2px 0 0"
+		        controls-position="compact"
+		        style="margin: 2px 0 0"
 				size="is-small"
 				icon-pack="fal"
 				max="100"
@@ -177,26 +177,26 @@
 			</div>
 		</td>
 		<td v-if="visible('vat')">
-      <div style="display: inline-flex">
-        <div v-if="editable('vat')">
-          <b-numberinput v-model="item.vat.amount"
-            controls-position="compact"
-            style="margin: 2px 0 0"
-            size="is-small"
-            icon-pack="fal"
-            min="0" max="100"
-            step="0.01"
-            @input="updateVirtualTotal"></b-numberinput>
-        </div>
-        <font v-else>{{item.vat.amount | percentage}}</font>
-        <div v-if="editable('vat')" style="margin: 2px;">
-          <b-checkbox v-if="editable('vat')"
-            v-model="item.vat.included"
-            style="margin: 3px -20px 0 -16px;"
-            size="is-medium"
-            @input="updateVirtualTotal"></b-checkbox>
-        </div>
-      </div>
+			<div style="display: inline-flex">
+				<div v-if="editable('vat')">
+					<b-numberinput v-model="item.vat.amount"
+					controls-position="compact"
+					style="margin: 2px 0 0"
+					size="is-small"
+					icon-pack="fal"
+					min="0" max="100"
+					step="0.01"
+					@input="updateVirtualTotal"></b-numberinput>
+				</div>
+				<font v-else>{{item.vat.amount | percentage}}</font>
+				<div v-if="editable('vat')" style="margin: 2px;">
+					<b-checkbox v-if="editable('vat')"
+					v-model="item.vat.included"
+					style="margin: 3px -20px 0 -16px;"
+					size="is-medium"
+					@input="updateVirtualTotal"></b-checkbox>
+				</div>
+			</div>
 		</td>
 		<td v-if="visible('total') && show" class="has-text-right">{{price.withVat | pricing}}</td>
 		<td v-if="visible('totalDiscounted') && show" class="has-text-right">{{price.discounted+price.vat | pricing}}</td>
@@ -204,8 +204,8 @@
 			<b-numberinput v-if="editable('totalVat')"
 				v-model="virtualTotalVat"
 				@input="adaptDiscount"
-        controls-position="compact"
-        style="margin: 2px 0 0"
+		        controls-position="compact"
+		        style="margin: 2px 0 0"
 				size="is-small"
 				icon-pack="fal"
 				:min="minVirtualTotalVat"
