@@ -1,7 +1,7 @@
 <template>
 	<div class="column is-12">
 		<div class="invoice-content" :style="compactStyle">
-			<table v-if="content.length>0" class="table is-striped is-bordered is-fullwidth">
+			<table v-if="content.length>0" class="table is-striped is-bordered is-fullwidth is-narrow">
 				<thead>
 					<tr>
 						<th class="is-narrow has-text-grey has-text-weight-light">+</th>
