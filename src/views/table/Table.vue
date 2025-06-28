@@ -7,6 +7,7 @@
 						<th class="is-narrow has-text-grey has-text-weight-light">+</th>
 						<th v-if="fields.includes('name')">Name</th>
 						<th v-if="fields.includes('indexes')" class="is-narrow">App ID</th>
+						<th v-if="fields.includes('condition')" class="is-narrow">Condition</th>
 						<th v-if="fields.includes('idlist')" class="is-narrow">ID List</th>
 						<th v-if="fields.includes('period')" class="is-narrow">Period</th>
 						<th v-if="fields.includes('stock')" class="is-narrow">Stock</th>
@@ -26,7 +27,7 @@
 						:show="show"
 						:item.sync="item"
 						:counter="i+1"
-						:fields="fields"
+						:fields="getFieldsForItem(i)"
 						:features="features"
 						:availableOptions="availableOptions"
 						v-on="$listeners"></invoice-item-row>
@@ -55,6 +56,7 @@
 		props: {
 			show: { type: Boolean },
 			fields: { type: String },
+			customFields: { type: Array, default: () => [] },
 			features: { type: String },
 			availableOptions: { type: Array },
 			content: {
@@ -62,6 +64,14 @@
 				default() {
 					return []
 				}
+			}
+		},
+		methods: {
+			getFieldsForItem(index) {
+				if (this.customFields.length > 0 && this.customFields[index]) {
+					return this.customFields[index];
+				}
+				return this.fields;
 			}
 		},
 		computed: {

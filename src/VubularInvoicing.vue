@@ -22,6 +22,7 @@
 				:key="label"
 				:show="showState"
 				:fields="fields"
+				:customFields="customFields"
 				:features="features"
 				:content.sync="content"
 				:availableOptions="availableOptions"
@@ -92,6 +93,10 @@
 			fields: {
 				type: String,
 				default: "name:remove,price,quantity:edit,discount:edit,totalVat"
+			},
+			customFields: {
+				type: Array,
+				default: () => []
 			},
 			draftFields: {
 				type: String,

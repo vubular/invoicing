@@ -100,8 +100,10 @@
 					<plain v-else>{{item.idlist}}</plain>
 				</font>
 			</template>
-			<button type="button" @click="removeAll" class="button is-small is-danger is-light m-2" :disabled="item && item.idlist && item.idlist.length<10 || !item.idlist"> <i class="fa fa-times mr-1"> </i> Remove all </button>
-			<button type="button" @click="removeMissings" class="button is-small is-danger is-light m-2" :disabled="ui.wrongIdlist"> <i class="fa fa-times mr-1"> </i> Remove missings </button>
+			<div v-if="editable('idlist')">
+				<button type="button" @click="removeAll" class="button is-small is-danger is-light m-2" :disabled="item && item.idlist && item.idlist.length<10 || !item.idlist"> <i class="fa fa-times mr-1"> </i> Remove all </button>
+				<button type="button" @click="removeMissings" class="button is-small is-danger is-light m-2" :disabled="ui.wrongIdlist"> <i class="fa fa-times mr-1"> </i> Remove missings </button>
+			</div>
 		</td>
 		<td v-if="visible('period')">
 			<b-datepicker v-if="editable('period')" v-model="virtualPeriod" @input="setPeriod" type="month" icon-pack="fa" icon="calendar-alt" size="is-small"  multiple></b-datepicker>
