@@ -269,13 +269,24 @@
 			this.oldQuantity = this.item.quantity;
 
 			var parsingDate = new Date();
-			if(this.editable("period") && this.item.period) {
-				var parsingMonth = this.item.period.split("/").shift()+"/01/";
-				var parsingYear = this.item.period.split("/").pop();
-				parsingDate = parsingMonth+parsingYear;
-			}
+      if(this.editable("period") && this.item.period) {
+        var parts = this.item.period.split(",").map(p => p.trim()).filter(Boolean);
+        if(parts.length>0) {
+          this.virtualPeriod = [];
+          parts.forEach(part => {
+            var month = part.split("/").shift();
+            var year = part.split("/").pop();
+            var composed = month+"/01/"+year;
+            var d = new Date(Date.parse(composed));
+            d.setDate(1);
+            d.setHours(0, 0, 0, 0);
+            this.virtualPeriod.push(new Date(d));
+          });
+          this.setPeriod(this.virtualPeriod);
+        }
+      }
 
-			if(this.editable("period")) {
+			if(this.editable("period") && this.virtualPeriod.length==0) {
 				var newDate = new Date(Date.parse(parsingDate));
 				newDate.setDate(1);
 				newDate.setHours(0, 0, 0, 0);
@@ -321,7 +332,14 @@
 					pers.push(this.dayjs(period).format("MM/YYYY"));
 				}
 
-				this.oldQuantity = this.item.quantity;
+        // Sort periods chronologically
+        pers.sort((a, b) => {
+          var dateA = new Date(a.split("/")[1] + "/" + a.split("/")[0] + "/01");
+          var dateB = new Date(b.split("/")[1] + "/" + b.split("/")[0] + "/01");
+          return dateA - dateB;
+        });
+
+        this.oldQuantity = this.item.quantity;
 				this.item.quantity = this.arrayUnique(pers).length;
 				pers = this.arrayUnique(pers).join(", ");
 
